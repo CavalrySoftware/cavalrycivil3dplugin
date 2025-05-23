@@ -1,0 +1,5 @@
+﻿The Plugin is initially built with .NET Framework to work with Civil3D 2024 and lower versions. 
+This can still work in 2025 but cant access the full feature of it.
+The DLL references used is from Civil3D 2024 or lower version.
+
+If we need to access 2025 features. We need to recreate a new Project intended for 2025 only.

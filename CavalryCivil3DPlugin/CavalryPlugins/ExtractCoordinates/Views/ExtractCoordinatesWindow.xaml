@@ -1,0 +1,282 @@
+﻿<Window x:Class="CavalryCivil3DPlugin.CavalryPlugins.ExtractCoordinates.Views.ExtractCoordinatesWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+        xmlns:local="clr-namespace:CavalryCivil3DPlugin.CavalryPlugins.ExtractCoordinates.Views"
+        xmlns:z="clr-namespace:CavalryCivil3DPlugin.CavalryPlugins.ExtractCoordinates.Views"
+        xmlns:converter="clr-namespace:CavalryCivil3DPlugin.WPFSupportFunctions.Supports"
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+        mc:Ignorable="d"
+        Width="700"
+        Height="550"
+        MaxHeight="700"
+        MaxWidth="1000"
+        MinWidth="550"
+        MinHeight="420"
+        Title="Cavalry - Extract Coordinates"
+        WindowStartupLocation="CenterScreen"
+        Icon="pack://application:,,,/CavalryCivil3DPlugin;component/Icons/CavalryLogo_16.ico">
+
+
+    <Window.Resources>
+        <ResourceDictionary>
+            
+            <converter:EmptyToZeroConverter x:Key="EmptyToZeroConverter"/>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/CavalryCivil3DPlugin;component/SourceFiles/WPFStyles.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
+
+    <Grid Margin="5">
+
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition Height="30"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0">
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="4*" MinWidth="200"/>
+                <ColumnDefinition Width="5*" MinWidth="300"/>
+            </Grid.ColumnDefinitions>
+
+            <Border Padding="5"
+                    Grid.Row="1"
+                    Grid.Column="0"
+                    Margin="0 0 5 0">
+
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <DockPanel Grid.Row="0">
+                        <TextBlock Text="Object Type: "/>
+                        <ComboBox Name="Window_ObjectType" 
+                                  ItemsSource="{Binding Path=CADObjectsMainModel.CADObjectTypes}" 
+                                  SelectedItem="{Binding Path=SelectedObjectType}"
+                                  Style="{StaticResource CustomComboBoxStyle}"
+                                  Margin="1 0 0 0">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Path=ObjectName}"/>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </DockPanel>
+
+                    <DockPanel Grid.Row="1" Margin="0 5 0 5">
+                        <TextBlock Text="Filter by: "/>
+                        <ComboBox Name="Object_Filter" 
+                                  ItemsSource="{Binding Path=SelectedObjectType.Filters}" 
+                                  SelectedItem="{Binding Path=SelectedFilter}"
+                                  Style="{StaticResource CustomComboBoxStyle}"
+                                  Margin="21.5 0 0 0">     
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Path=FilterName}"/>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </DockPanel>
+
+                    <TextBlock Text="{Binding Path=PromptFilterKey}" Grid.Row="2" Margin="0 18 0 0"/>
+
+                    <ListBox ItemsSource="{Binding Path=SelectedFilter.FilterOptions}" 
+                             ItemContainerStyle="{StaticResource WithCheckbox}" 
+                             SelectionChanged="FilterKeySelectionChanged"
+                             SelectedItem="{Binding Path=SelectedFilterKey}"
+                             SelectionMode="{Binding Path=FilterSelectionMode}"
+                             Margin="0 5 0 0 "
+                             Grid.Row="3">
+                    </ListBox>
+
+                </Grid>
+            </Border>
+
+            <Border Padding="5"
+                    Grid.Row="1"
+                    Grid.Column="1">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <DockPanel Grid.Row="0">
+                        <TextBlock Text="{Binding Path=PromptSelectObjects}"/>
+                        <Button Width="20" 
+                                VerticalAlignment="Center" 
+                                DockPanel.Dock="Right" 
+                                Style="{StaticResource bstyle2}"
+                                HorizontalAlignment="Right"
+                                Command="{Binding Path=PickPolylinesCommand}">  
+                            <Image Source="pack://application:,,,/CavalryCivil3DPlugin;component/Icons/SelectElements_32.ico"/>
+                        </Button>
+                    </DockPanel>
+                    
+                    <DockPanel Grid.Row="1" Margin="0 13 0 0">
+                        <CheckBox Content="Combine" IsChecked="{Binding Path=IsCombined}" VerticalAlignment="Center"/>
+                        <CheckBox Content="Annotate" IsChecked="{Binding Path=IsAnnotate}" Margin="20 0 0 0" VerticalAlignment="Center"/>
+                        <CheckBox Content="Elevation" IsChecked="{Binding Path=IncludeElevation}" Margin="20 0 0 0" VerticalAlignment="Center"/>
+
+                        <TextBox DockPanel.Dock="Right" 
+                                 HorizontalAlignment="Right" 
+                                 MinWidth="40" MaxWidth="40"
+                                 z:TextBoxHelper.Placeholder="P"
+                                 Text="{Binding Path=Prefix}"
+                                 Foreground="{StaticResource Blue1}">   
+                        </TextBox>
+                        
+                        <TextBlock Text= "Prefix:" HorizontalAlignment="Right" DockPanel.Dock="Right" Margin="0 0 5 0"/>
+                    </DockPanel>
+
+                    <Expander Grid.Row="2" Margin="0 10 0 0" Header="More Settings" Foreground="{StaticResource DarkAccent}">
+                        <Border Style="{StaticResource Basic}" Padding="5 10 5 1" Margin="0 5 0 0">
+                            
+                            <StackPanel>
+                                <DockPanel>
+                                    <TextBlock Text="Table Name: " DockPanel.Dock="Left" Foreground="Black" Height="20"/>
+                                    <TextBox HorizontalAlignment="Stretch"  Margin="6 0 0 0" Text="{Binding Path=TableName}" Foreground="{StaticResource Blue1}"/>
+                                </DockPanel>
+                                <Grid Margin=" 0 5 0 0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock Text="Prefixes: " DockPanel.Dock="Left" Foreground="Black" Grid.Column="0"/>
+                                    <TextBlock Grid.Column="1" 
+                                               Text="{Binding Path=PrefixPlaceholder}" 
+                                               VerticalAlignment="Center" 
+                                               Margin="27.5 0 0 0"
+                                               Foreground="#FFBFCDDB">
+                                    </TextBlock>
+
+                                    <TextBox HorizontalAlignment="Stretch"  
+                                             Margin="27.5 0 0 0" 
+                                             Height="20"
+                                             Text="{Binding Path=Prefixes}" 
+                                             Foreground="{StaticResource Blue1}"
+                                             Grid.Column="1"
+                                             Background="Transparent">
+
+                                        <i:Interaction.Triggers>
+                                            <i:EventTrigger EventName="GotFocus">
+                                                <i:CallMethodAction TargetObject="{Binding}" MethodName="OnTextBoxFocused"/>
+                                            </i:EventTrigger>
+
+                                            <i:EventTrigger EventName="LostFocus">
+                                                <i:CallMethodAction TargetObject="{Binding}" MethodName="OnTextBoxUnFocused" />
+                                            </i:EventTrigger>
+                                            
+                                        </i:Interaction.Triggers>
+                                    </TextBox>
+                                </Grid>
+
+                                <Grid Margin=" 0 5 0 5">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <TextBlock Text="Table Style: " DockPanel.Dock="Left" Foreground="Black" Grid.Column="0"/>
+                                    <ComboBox HorizontalAlignment="Stretch"  
+                                             Margin="13 0 0 0"
+                                             Grid.Column="1"
+                                             Style="{StaticResource CustomComboBoxStyle}"
+                                             ItemsSource="{Binding Path=TableStyles.ExistingStyleNames}"
+                                             SelectedItem="{Binding Path=SelectedTableStyle}">
+                                    </ComboBox>
+                                </Grid>
+
+                                <Separator Margin="0 10 0 10"/>
+
+                                <TextBlock Text="Annotations: " Foreground="Black"/>
+                                <Grid Margin="0 5 0 5">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition/>
+                                    </Grid.ColumnDefinitions>
+                                    <DockPanel Grid.Column="0">
+                                        <TextBlock Text="X Offset:" Margin=" 0 0 5 0" Foreground="Black"/>
+                                        <TextBox Grid.Column="0" 
+                                                 Text="{Binding Path=XOffset}" 
+                                                 Foreground="{StaticResource Blue1}">
+                                            
+                                            <i:Interaction.Triggers>
+                                                <i:EventTrigger EventName="LostFocus">
+                                                    <i:CallMethodAction TargetObject="{Binding}" MethodName="OnXOffsetUnFocused" />
+                                                </i:EventTrigger>
+                                            </i:Interaction.Triggers>
+                                        </TextBox>
+                                    </DockPanel>
+                                    
+                                    <DockPanel Grid.Column="1">
+                                        <TextBlock Text="Y Offset:" Margin="10 0 5 0" Foreground="Black"/>
+                                        <TextBox Margin="0 0 0 0" Text="{Binding Path=YOffset}" Foreground="{StaticResource Blue1}">
+                                            <i:Interaction.Triggers>
+                                                <i:EventTrigger EventName="LostFocus">
+                                                    <i:CallMethodAction TargetObject="{Binding}" MethodName="OnYOffsetUnFocused" />
+                                                </i:EventTrigger>
+                                            </i:Interaction.Triggers>
+                                        </TextBox>
+                                    </DockPanel>
+                                </Grid>
+                                
+                                <Separator Margin="0 10 0 10"/>
+
+                                <CheckBox Content="Create Point Groups" Margin="0 0 0 5" IsChecked="{Binding Path=WillCreatePointGroups}"/>
+                                <Grid Margin="0 5 0 5">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="Group Name: " DockPanel.Dock="Left" Foreground="Black" Grid.Column="0"/>
+                                    <TextBox HorizontalAlignment="Stretch" 
+                                             Height="20" 
+                                             Text="{Binding Path=PointGroupsName}" 
+                                             Foreground="{StaticResource Blue1}" 
+                                             Grid.Column="1"
+                                             IsEnabled="{Binding Path=WillCreatePointGroups}"/>
+                                </Grid>
+
+                            </StackPanel>
+                        </Border>
+                    </Expander>
+                    
+                    <ListBox ItemsSource="{Binding Path=SelectedObjectType.AllExistingEntitiesCollection}"
+                             SelectedItem="{Binding Path=SelectedEntities}"
+                             ItemContainerStyle="{StaticResource WithCheckbox}"
+                             SelectionChanged="EntitySelectionChanged"
+                             SelectionMode="Extended"
+                             Margin="0 9 0 0"
+                             Grid.Row="3">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Path=Name}"/>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <DockPanel Grid.Row="1" HorizontalAlignment="Right">
+            <Button x:Name="OK" Content="Ok" Style="{StaticResource bstyle1}" Margin="0 0 5 0" Command="{Binding Path=ExtractCoordinatesCommand}"/>
+            <Button x:Name="CANCEL" Content="Cancel" Style="{StaticResource bstyle1}" Command="{Binding Path=CancelCommand}"/>
+        </DockPanel>
+    </Grid>
+    
+</Window>
+    
+    
+    
