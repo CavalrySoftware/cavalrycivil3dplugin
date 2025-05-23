@@ -222,7 +222,7 @@ namespace CavalryCivil3DPlugin.CavalryPlugins.ExtractCoordinates.ViewModel
             {
                 _SelectedFilter = value;
                 UpdateFilterSelectionMode(value.FilterName);
-                PromptFilterKey = value.FilterName == "Layer" ? "Select Layers:" : "Select Property:";
+                UpdatePromptFilterKeySelection();
                 SelectedFilterKey = SelectedFilter.FilterOptions.FirstOrDefault();
                 OnPropertyChanged(nameof(SelectedFilter));
             }
@@ -532,6 +532,25 @@ namespace CavalryCivil3DPlugin.CavalryPlugins.ExtractCoordinates.ViewModel
                 default:
                     FilterSelectionMode = WindowsSelectionMode.Single;
                     break;
+            }
+        }
+
+
+        private void UpdatePromptFilterKeySelection()
+        {
+            if (SelectedFilter.FilterName == "Site")
+            {
+                PromptFilterKey = "Select Site:";
+            }
+
+            else if (SelectedFilter.FilterName.Contains("Object Data"))
+            {
+                PromptFilterKey = "Select Property:";
+            }
+
+            else
+            {
+                PromptFilterKey = "Select Layer:";
             }
         }
 
