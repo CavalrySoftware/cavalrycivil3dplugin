@@ -292,7 +292,6 @@ namespace CavalryCivil3DPlugin.Models.CADObject
             }
 
             SetFilters();
-
         }
 
 

@@ -124,24 +124,52 @@ namespace CavalryCivil3DPlugin.CavalryPlugins.ExtractCoordinates.Commands
 
             if (_objectIds != null)
             {
-                int index = 0;
-                foreach (CADObjectId objectId in _objectIds)
+
+                if (ViewModel_.IsCombined)
                 {
 
-                    coordinates = GetCoordinatesFromId(objectId);
-
-                    string prefix = _PrefixList.Count == coordinates.Count ? _PrefixList[index] : _PointPrefix;
-
-                    bool created =  CreateTable(coordinates, _TableStyleName, headers, title, prefix, ViewModel_.IncludeElevation);
-                    if (!created) break;
-
-                    if (ViewModel_.WillCreatePointGroups)
+                    var combinedCooridnates = new List<Point3d>();
+                    foreach (CADObjectId objectId in _objectIds)
                     {
-                        string groupName = string.IsNullOrEmpty(ViewModel_.PointGroupsName) ? prefix : ViewModel_.PointGroupsName;
-                        CreatePointGroup(coordinates, prefix, groupName);
+                        coordinates = GetCoordinatesFromId(objectId);
+                        combinedCooridnates.AddRange(coordinates);
                     }
 
-                    index ++;
+                    string prefix = _PrefixList.Count != 0 ? _PrefixList[0] : _PointPrefix;
+                    bool created = CreateTable(combinedCooridnates, _TableStyleName, headers, title, prefix, ViewModel_.IncludeElevation);
+                    
+                    if (!created)
+                    {
+                        if (ViewModel_.WillCreatePointGroups)
+                        {
+                            string groupName = string.IsNullOrEmpty(ViewModel_.PointGroupsName) ? prefix : ViewModel_.PointGroupsName;
+                            CreatePointGroup(combinedCooridnates, prefix, groupName);
+                        }
+                    }        
+                }
+
+
+                else
+                {
+                    int index = 0;
+                    foreach (CADObjectId objectId in _objectIds)
+                    {
+
+                        coordinates = GetCoordinatesFromId(objectId);
+
+                        string prefix = _PrefixList.Count == coordinates.Count ? _PrefixList[index] : _PointPrefix;
+
+                        bool created = CreateTable(coordinates, _TableStyleName, headers, title, prefix, ViewModel_.IncludeElevation);
+                        if (!created) break;
+
+                        if (ViewModel_.WillCreatePointGroups)
+                        {
+                            string groupName = string.IsNullOrEmpty(ViewModel_.PointGroupsName) ? prefix : ViewModel_.PointGroupsName;
+                            CreatePointGroup(coordinates, prefix, groupName);
+                        }
+
+                        index++;
+                    }
                 }
             }
         }
