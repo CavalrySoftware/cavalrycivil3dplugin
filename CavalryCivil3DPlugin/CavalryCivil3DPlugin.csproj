@@ -62,6 +62,7 @@
     </Reference>
     <Reference Include="Microsoft.Xaml.Behaviors, Version=1.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Xaml.Behaviors.Wpf.1.1.135\lib\net462\Microsoft.Xaml.Behaviors.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
@@ -78,14 +79,16 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ACADLibrary\Annotation\CADText.cs" />
-    <Compile Include="ACADLibrary\Elements\_Polyline.cs" />
-    <Compile Include="ACADLibrary\Selection\ACADObjectSelection.cs" />
-    <Compile Include="ACADLibrary\AutoCADTable\CADTable.cs" />
-    <Compile Include="ACADLibrary\_ObjectData\_ObjectDataTable.cs" />
-    <Compile Include="C3DLibrary\Elements\_FeatureLines.cs" />
-    <Compile Include="C3DLibrary\Elements\_Points.cs" />
-    <Compile Include="C3DLibrary\Selection\C3DObjectSelection.cs" />
+    <Compile Include="_ACADLibrary\Annotation\CADText.cs" />
+    <Compile Include="_ACADLibrary\Elements\_Line.cs" />
+    <Compile Include="_ACADLibrary\Elements\_Polyline.cs" />
+    <Compile Include="_ACADLibrary\Geometry\Lines.cs" />
+    <Compile Include="_ACADLibrary\Selection\ACADObjectSelection.cs" />
+    <Compile Include="_ACADLibrary\AutoCADTable\CADTable.cs" />
+    <Compile Include="_ACADLibrary\_ObjectData\_ObjectDataTable.cs" />
+    <Compile Include="_C3DLibrary\Elements\_FeatureLines.cs" />
+    <Compile Include="_C3DLibrary\Elements\_Points.cs" />
+    <Compile Include="_C3DLibrary\Selection\C3DObjectSelection.cs" />
     <Compile Include="CavalryPlugins\ExtractCoordinates\Commands\CancelCommand.cs" />
     <Compile Include="CavalryPlugins\ExtractCoordinates\Commands\CommandBase.cs" />
     <Compile Include="CavalryPlugins\ExtractCoordinates\Commands\ExtractCoordinatesOk.cs" />
@@ -97,6 +100,8 @@
       <DependentUpon>ExtractCoordinatesWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="CavalryPlugins\ExtractCoordinates\Views\TextBoxHelper.cs" />
+    <Compile Include="CavalryPlugins\LowerPipe\LowerPipeStartUp.cs" />
+    <Compile Include="CavalryPlugins\LowerPipe\Test.cs" />
     <Compile Include="Class1.cs" />
     <Compile Include="Consoles\ConsoleBasic.xaml.cs">
       <DependentUpon>ConsoleBasic.xaml</DependentUpon>

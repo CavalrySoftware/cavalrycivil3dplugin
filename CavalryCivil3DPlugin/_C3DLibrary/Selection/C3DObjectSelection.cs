@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using Autodesk.Aec.Geometry;
 using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
@@ -17,7 +18,10 @@ namespace CavalryCivil3DPlugin.C3DLibrary.Selection
     {
 
         private static TypedValue _FeatureLinesType = new TypedValue((int)DxfCode.Start, "AECC_FEATURE_LINE");
+        private static TypedValue _ProfileViewType = new TypedValue((int)DxfCode.Start, "AECC_PROFILE_VIEW");
         private static SelectionFilter _FeatureLinesFilter = new SelectionFilter(new TypedValue[] { _FeatureLinesType });
+        private static SelectionFilter _ProfileViewFilter = new SelectionFilter(new TypedValue[] { _ProfileViewType });
+
 
         public static List<CadObjectId> GetAllFeatureLineIds(CivilDocument _civilDocument, Document _acadDocument)
         {
@@ -157,5 +161,41 @@ namespace CavalryCivil3DPlugin.C3DLibrary.Selection
 
             return polylineIds;
         }
+
+
+
+        public static ObjectId PickProfileView(Document _autocadDocument)
+        {
+            return PickElement(_autocadDocument, typeof(ProfileView), "Profile View");
+        }
+
+
+        public static ObjectId PickPressurePipe(Document _autocadDocument)
+        {
+            return PickElement(_autocadDocument, typeof(PressurePipe), "Pressure Pipe");
+        }
+
+
+        private static ObjectId PickElement(Document _autocadDocument, Type _elementType, string elementName)
+        {
+            string selectMessage = ($"\nSelect {elementName}");
+            string rejectMessage = ($"\nSelect only {elementName}");
+
+            PromptSelectionOptions promptOptions = new PromptSelectionOptions();
+
+            PromptEntityOptions promptEntityOptions = new PromptEntityOptions($"\n{selectMessage}");
+            promptEntityOptions.SetRejectMessage($"\n{rejectMessage}");
+            promptEntityOptions.AddAllowedClass(_elementType, true);
+
+            PromptEntityResult selectionResult = _autocadDocument.Editor.GetEntity(promptEntityOptions);
+
+            if (selectionResult.Status == PromptStatus.OK)
+            {
+                return selectionResult.ObjectId;
+            }
+
+            return ObjectId.Null;
+        }
+
     }
 }

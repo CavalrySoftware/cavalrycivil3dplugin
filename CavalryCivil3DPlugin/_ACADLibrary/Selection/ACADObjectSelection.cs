@@ -183,5 +183,50 @@ namespace CavalryCivil3DPlugin.ACADLibrary.Selection
             layerNames.Sort();
             return layerNames;
         }
+
+        private static ObjectId PickElement(Document _autocadDocument, Type _elementType, string elementName)
+        {
+            string selectMessage = ($"\nSelect {elementName}");
+            string rejectMessage = ($"\nSelect only {elementName}");
+
+            PromptSelectionOptions promptOptions = new PromptSelectionOptions();
+
+            PromptEntityOptions promptEntityOptions = new PromptEntityOptions($"\n{selectMessage}");
+            promptEntityOptions.SetRejectMessage($"\n{rejectMessage}");
+            promptEntityOptions.AddAllowedClass(_elementType, true);
+
+            PromptEntityResult selectionResult = _autocadDocument.Editor.GetEntity(promptEntityOptions);
+
+            if (selectionResult.Status == PromptStatus.OK)
+            {
+                return selectionResult.ObjectId;
+            }
+
+            return ObjectId.Null;
+        }
+
+
+        public static ObjectId PickLine(Document _autocadDocument)
+        {
+            return PickElement(_autocadDocument, typeof(Line), "Line");
+        }
+
+
+        public static ObjectId PickObject(Document _autocadDocument, string _selectMessage)
+        {
+            PromptSelectionOptions promptOptions = new PromptSelectionOptions();
+
+            PromptEntityOptions promptEntityOptions = new PromptEntityOptions($"\n{_selectMessage}");
+    
+            PromptEntityResult selectionResult = _autocadDocument.Editor.GetEntity(promptEntityOptions);
+
+            if (selectionResult.Status == PromptStatus.OK)
+            {
+                return selectionResult.ObjectId;
+            }
+
+            return ObjectId.Null;
+        }
+
     }
 }

@@ -76,6 +76,12 @@ namespace CavalryCivil3DPlugin.Consoles
             ConsoleBasic consoleBasic = new ConsoleBasic(number.ToString());
         }
 
+        public static void ShowConsole(Exception ex)
+        {
+            string message = $"{ex.Message}. \n{ex.ToString()}";
+            ConsoleBasic consoleBasic = new ConsoleBasic(message);
+        }
+
     }
 
 }
