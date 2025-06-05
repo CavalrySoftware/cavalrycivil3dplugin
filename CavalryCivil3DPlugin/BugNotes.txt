@@ -1,0 +1,4 @@
+﻿Extract Coordinates
+    - Some drawings have an error when selecting all the layers. 
+    - cause an error if there is not site created in the drawing.
+                    

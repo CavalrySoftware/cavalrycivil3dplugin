@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Autodesk.AutoCAD.Runtime;
+using CavalryCivil3DPlugin.CavalryPlugins.LowerPipe.ViewModels;
+using CavalryCivil3DPlugin.CavalryPlugins.LowerPipe.Views;
 using CavalryCivil3DPlugin.Consoles;
 
 namespace CavalryCivil3DPlugin.CavalryPlugins.LowerPipe
@@ -15,7 +17,7 @@ namespace CavalryCivil3DPlugin.CavalryPlugins.LowerPipe
         {
             try
             {
-                Test test = new Test();
+                LowerPipeMainWindow mainWindow = new LowerPipeMainWindow();
             }
 
             catch (System.Exception ex) {_Console.ShowConsole(ex);}

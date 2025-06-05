@@ -163,16 +163,15 @@ namespace CavalryCivil3DPlugin.C3DLibrary.Selection
         }
 
 
-
         public static ObjectId PickProfileView(Document _autocadDocument)
         {
             return PickElement(_autocadDocument, typeof(ProfileView), "Profile View");
         }
 
 
-        public static ObjectId PickPressurePipe(Document _autocadDocument)
+        public static ObjectId PickPressurePipe(Document _autocadDocument, string _select)
         {
-            return PickElement(_autocadDocument, typeof(PressurePipe), "Pressure Pipe");
+            return PickElement(_autocadDocument, typeof(PressurePipe), _select);
         }
 
 

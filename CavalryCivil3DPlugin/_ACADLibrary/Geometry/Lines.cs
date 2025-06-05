@@ -69,5 +69,17 @@ namespace CavalryCivil3DPlugin._ACADLibrary.Geometry
 
             return coordinateAtPoint;   
         }
+
+
+        public static double GetAngle(Point2d p1, Point2d p2)
+        {
+            return Tangent((p2.Y - p1.Y) * (p2.X - p1.X));
+        }
+
+        private static double Tangent(double x)
+        {
+            return Math.Tan(x * (Math.PI / 180));
+        }
+
     }
 }

@@ -157,8 +157,7 @@ namespace CavalryCivil3DPlugin.CavalryPlugins.ExtractCoordinates.Commands
 
                         coordinates = GetCoordinatesFromId(objectId);
 
-                        string prefix = _PrefixList.Count == coordinates.Count ? _PrefixList[index] : _PointPrefix;
-
+                        string prefix = _PrefixList.Count == _objectIds.Count ? _PrefixList[index] : _PointPrefix;
                         bool created = CreateTable(coordinates, _TableStyleName, headers, title, prefix, ViewModel_.IncludeElevation);
                         if (!created) break;
 
@@ -167,7 +166,6 @@ namespace CavalryCivil3DPlugin.CavalryPlugins.ExtractCoordinates.Commands
                             string groupName = string.IsNullOrEmpty(ViewModel_.PointGroupsName) ? prefix : ViewModel_.PointGroupsName;
                             CreatePointGroup(coordinates, prefix, groupName);
                         }
-
                         index++;
                     }
                 }

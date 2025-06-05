@@ -62,8 +62,8 @@
 
     <Style TargetType="Border" x:Key="Basic">
         <Setter Property="CornerRadius" Value="0"/>
-        <Setter Property="BorderBrush" Value="{StaticResource DarkAccent}"/>
-        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="BorderBrush" Value="{StaticResource Blue1}"/>
+        <Setter Property="BorderThickness" Value="2"/>
     </Style>
     <!--#endregion-->
 

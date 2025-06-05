@@ -70,9 +70,10 @@ namespace CavalryCivil3DPlugin.CavalryPlugins.LowerPipe
 
         }
 
+
         public void Test2 ()
         {
-            ObjectId pressurePipeId = C3DObjectSelection.PickPressurePipe(AutocadDocument);
+            ObjectId pressurePipeId = C3DObjectSelection.PickPressurePipe(AutocadDocument, "Pressure Pipe");
             _Console.ShowConsole(pressurePipeId.ToString());
         }
 
