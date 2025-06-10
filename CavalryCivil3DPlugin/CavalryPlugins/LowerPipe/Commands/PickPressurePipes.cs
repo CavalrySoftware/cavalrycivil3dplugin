@@ -25,7 +25,12 @@ namespace CavalryCivil3DPlugin.CavalryPlugins.LowerPipe.Commands
 
         public override void Execute(object parameter)
         {
-            
+            _ViewModel.HideAction.Invoke();
+            if (Pick())
+            {
+                _ViewModel.ResetCalculations();
+            }
+            _ViewModel.ShowAction.Invoke();
         }
 
         public bool Pick()
@@ -39,12 +44,14 @@ namespace CavalryCivil3DPlugin.CavalryPlugins.LowerPipe.Commands
 
             ObjectId pipeLowerId = C3DObjectSelection.PickPressurePipe(_ViewModel.AutocadDocument, "Pressure Pipe to be lowered");
 
-            if (pipeUpperId == ObjectId.Null)
+            if (pipeLowerId == ObjectId.Null)
             {
                 return false;
             }
 
-            _ViewModel.SetPressurePipes(pipeUpperId, pipeLowerId);
+            _ViewModel.UpperPipe.SetPipe(pipeUpperId);
+            _ViewModel.LowerPipe.SetPipe(pipeLowerId);  
+            
             return true;
         }
     }

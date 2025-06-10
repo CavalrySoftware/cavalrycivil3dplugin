@@ -559,7 +559,7 @@ namespace CavalryCivil3DPlugin.CavalryPlugins.ExtractCoordinates.ViewModel
 
         private void Test(string s = null)
         {
-            _Console.ShowConsole(CADTable.GetAllTableStyleNames(AutocadDocument));
+            
         }
     }
 }

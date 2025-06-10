@@ -8,6 +8,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
@@ -28,9 +29,16 @@ namespace CavalryCivil3DPlugin.CavalryPlugins.LowerPipe.Views
         {
             InitializeComponent();
             mainViewModel = new LowerPipeMainViewModel();
-            //mainViewModel.CloseAction = this.Close;
-            //mainViewModel.HideAction = this.Hide;
+            mainViewModel.CloseAction = this.Close;
+            mainViewModel.HideAction = this.Hide;
+            mainViewModel.ShowAction = this.Show;
             this.DataContext = mainViewModel;
+
+            this.Closing += (s, e) =>
+            {
+                mainViewModel.ClosingWindow();
+            };
+
             this.Show();
         }
 
@@ -46,7 +54,28 @@ namespace CavalryCivil3DPlugin.CavalryPlugins.LowerPipe.Views
 
             border.Clip = new RectangleGeometry(rect);
         }
+
+
+        protected override void OnSourceInitialized(EventArgs e)
+        {
+            base.OnSourceInitialized(e);
+
+            var hwndSource = (HwndSource)PresentationSource.FromVisual(this);
+            hwndSource.AddHook(WndProc);
+        }
+
+        private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+        {
+            const int WM_SYSCOMMAND = 0x0112;
+            const int SC_CLOSE = 0xF060;
+
+            if (msg == WM_SYSCOMMAND && wParam.ToInt32() == SC_CLOSE)
+            {
+                // X button clicked
+                mainViewModel.ClosedByXButton = true;
+            }
+
+            return IntPtr.Zero;
+        }
     }
-
-
 }

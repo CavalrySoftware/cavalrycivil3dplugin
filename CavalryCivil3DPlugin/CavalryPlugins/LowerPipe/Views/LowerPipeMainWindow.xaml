@@ -6,65 +6,146 @@
              xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
              xmlns:local="clr-namespace:CavalryCivil3DPlugin.CavalryPlugins.LowerPipe.Views"
              xmlns:local2="clr-namespace:CavalryCivil3DPlugin.CavalryPlugins.LowerPipe.ViewModels"
-             mc:Ignorable="d" 
+             mc:Ignorable="d"
              xmlns:converter="clr-namespace:CavalryCivil3DPlugin.WPFSupportFunctions.Supports"
-             Width="600"
-             Height="500"
-             Title="Cavalry - Lower Pipe"
+             Width="700"
+             Height="550"
+             Title="Cavalry - Lowering of Pipes"
              MaxHeight="700"
-             MaxWidth="800">
+             MaxWidth="800"
+             MinWidth="475"
+             MinHeight="500"
+             Icon="pack://application:,,,/CavalryCivil3DPlugin;component/Icons/CavalryLogo_16.ico">
 
     
     <Window.Resources>
-        <ResourceDictionary>
-            <converter:EmptyToZeroConverter x:Key="EmptyToZeroConverter"/>
+         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="pack://application:,,,/CavalryCivil3DPlugin;component/SourceFiles/WPFStyles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
+
+            <DataTemplate x:Key="LineTemplate">
+                <Line X1="{Binding X1}" Y1="{Binding Y1}"
+                      X2="{Binding X2}" Y2="{Binding Y2}"
+                      Stroke="{Binding Fill}" StrokeThickness="{Binding StrokeThickness}"/> 
+            </DataTemplate>
+
+            <DataTemplate x:Key="CircleTemplate">
+                <Ellipse
+                    Width="{Binding Diameter}"
+                    Height="{Binding Diameter}"
+                    Fill="{Binding Fill}"
+                    Stroke="{Binding Stroke}"
+                    StrokeThickness="{Binding StrokeThickness}"
+                    Canvas.Left="{Binding X}"
+                    Canvas.Top="{Binding Y}">
+                    
+                </Ellipse>
+            </DataTemplate>
+
+            <DataTemplate x:Key="TextTemplate">
+                <TextBlock Text="{Binding Text}"
+                           FontSize="{Binding FontSize}"
+                           Foreground="{Binding Fill}" 
+                           HorizontalAlignment="Center"/>
+            </DataTemplate>
+
+            <local2:ShapeTemplateSelector x:Key="ShapeSelector"
+                                          LineTemplate="{StaticResource LineTemplate}"
+                                          TextTemplate="{StaticResource TextTemplate}"
+                                          CircleTemplate="{StaticResource CircleTemplate}"/>
         </ResourceDictionary>
     </Window.Resources>
 
 
-    <Grid Margin="0 5 0 5">
 
+    <Grid Margin="0 5 0 5">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition />
-            <ColumnDefinition />
+            <ColumnDefinition MinWidth="200"/>
+            <ColumnDefinition MinWidth="250"/>
         </Grid.ColumnDefinitions>
 
         <Grid.RowDefinitions>
-            <RowDefinition/>
+            <RowDefinition MinHeight="200"/>
             <RowDefinition/>
             <RowDefinition Height="20"/>
         </Grid.RowDefinitions>
 
         <Border Grid.Row="0" Grid.Column="0" Margin="5">
-            <StackPanel Margin="7">
-                <DockPanel Margin="0 5 0 5">
+            <Grid Margin="7">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="30"/>
+                    <RowDefinition Height="30"/>
+                    <RowDefinition Height="30"/>
+                    <RowDefinition Height="*"/>
+                    
+                </Grid.RowDefinitions>
+
+                <DockPanel Margin="0 3 0 3" Grid.Row="0">
                     <TextBlock Text="Vertical Clearance: " Height="20"/>
-                    <TextBlock Text="m" DockPanel.Dock="Right" Margin="3 0 2 0" Foreground="{StaticResource DarkAccent}" Height="20"/>
-                    <TextBox Text="{Binding Path=VerticalClearance}" Foreground="{StaticResource Blue1}"/>
+                    <TextBlock Text="m" DockPanel.Dock="Right" Margin="4 0 2 0" Foreground="{StaticResource DarkAccent}" Height="20"/>
+                    <TextBox Text="{Binding Path=VerticalClearance, UpdateSourceTrigger=PropertyChanged}" Foreground="{StaticResource Blue1}" VerticalContentAlignment="Center">
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="KeyDown">
+                                <i:CallMethodAction 
+                                    MethodName="EnterValue" 
+                                    TargetObject="{Binding}" />
+                            </i:EventTrigger>
+
+                            <i:EventTrigger EventName="LostFocus">
+                                <i:CallMethodAction TargetObject="{Binding}" MethodName="InputLostFocus" />
+                            </i:EventTrigger>
+                        </i:Interaction.Triggers>
+                    </TextBox>
                 </DockPanel>
 
-                <DockPanel>
+                <DockPanel Grid.Row="1" Margin="0 3 0 3">
                     <TextBlock Text="Crossing Length: " Margin="0 0 8 0" Height="20"/>
-                    <TextBlock Text="m" DockPanel.Dock="Right" Margin="3 0 2 0" Foreground="{StaticResource DarkAccent}" Height="20"/>
-                    <TextBox Text="{Binding Path=CrossingLength}" Foreground="{StaticResource Blue1}"/>
+                    <TextBlock Text="m" DockPanel.Dock="Right" Margin="4 0 2 0" Foreground="{StaticResource DarkAccent}" Height="20" />
+                    <TextBox Text="{Binding Path=CrossingLength, UpdateSourceTrigger=PropertyChanged}" Foreground="{StaticResource Blue1}" VerticalContentAlignment="Center">
+                        <i:Interaction.Triggers>
+                            <i:EventTrigger EventName="KeyDown">
+                                <i:CallMethodAction 
+                                        MethodName="EnterValue" 
+                                        TargetObject="{Binding}" />
+                            </i:EventTrigger>
+                            
+                            <i:EventTrigger EventName="LostFocus">
+                                <i:CallMethodAction TargetObject="{Binding}" MethodName="InputLostFocus" />
+                            </i:EventTrigger>
+                            
+                        </i:Interaction.Triggers>
+                    </TextBox>
                 </DockPanel>
 
-                <DockPanel Margin="0 5 0 5">
+                <DockPanel Margin="0 3 0 3" Grid.Row="2">
                     <TextBlock Text="Max Deflection: " Margin="0 0 13.5 0" Height="20"/>
-                    <TextBlock Text="d°" DockPanel.Dock="Right" Margin="1.5 0 2 0" Foreground="{StaticResource DarkAccent}" Height="20"/>
-                    <TextBox Text="{Binding Path=MaxDeflection}" Foreground="{StaticResource Blue1}"/>
+                    <TextBlock Text="d°" DockPanel.Dock="Right" Margin="2.75 0 2 0" Foreground="{StaticResource DarkAccent}" Height="20"/>
+                    <TextBox Text="{Binding Path=MaxDeflection, UpdateSourceTrigger=PropertyChanged}" Foreground="{StaticResource Blue1}" VerticalContentAlignment="Center">
+                        <i:Interaction.Triggers>
+                            
+                            <i:EventTrigger EventName="KeyDown">
+                                <i:CallMethodAction 
+                                    MethodName="EnterValue" 
+                                    TargetObject="{Binding}" />
+                            </i:EventTrigger>
+                            
+                            <i:EventTrigger EventName="LostFocus">
+                                <i:CallMethodAction TargetObject="{Binding}" MethodName="InputLostFocus" />
+                            </i:EventTrigger>
+                            
+                        </i:Interaction.Triggers>
+                    </TextBox>
                 </DockPanel>
 
-                <CheckBox Content="Modify Pipe" Margin="0 8 0 8" IsChecked="{Binding Path=ModifyPipe}"/>
-                <CheckBox Content="Delete Profile" IsChecked="{Binding Path=DeleteProfile}"/>
-            </StackPanel>
+                <StackPanel Grid.Row="3" VerticalAlignment="Bottom" Margin="0 0 0 5">
+                    <CheckBox Content="Modify Pipe" Margin="0 8 0 8" IsChecked="{Binding Path=ModifyPipe}"/>
+                    <CheckBox Content="Delete Profile" IsChecked="{Binding Path=DeleteProfile}"/>
+                </StackPanel>
+            </Grid>
         </Border>
 
         
-
         <Grid Grid.Column="1" Grid.Row="0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
@@ -78,7 +159,7 @@
                     DockPanel.Dock="Right" 
                     Style="{StaticResource bstyle2}"
                     HorizontalAlignment="Right"
-                    Command="{Binding Path=PickPolylinesCommand}"
+                    Command="{Binding Path=PickPressurePipes}"
                     Grid.Row="1"
                     Margin="0 0 5 0">
                 <Image Source="pack://application:,,,/CavalryCivil3DPlugin;component/Icons/SelectElements_32.ico"/>
@@ -89,7 +170,7 @@
         <!-- Fixed canvas frame -->
         <Border Grid.Row="1" Background="Black" Grid.ColumnSpan="2" Margin="5" Style="{StaticResource Basic}">
             <Grid ClipToBounds="True">
-                <Canvas x:Name="DrawingCanvas">
+                <Canvas x:Name="DrawingCanvas" Background="Transparent">
                     <Canvas.RenderTransform>
                         <TransformGroup>
                             <ScaleTransform ScaleX="{Binding Zoom}" ScaleY="{Binding Zoom}" />
@@ -98,37 +179,35 @@
                     </Canvas.RenderTransform>
 
                     <i:Interaction.Behaviors>
-                        <local2:ZoomPanBehavior />
+                        <local2:ZoomPanBehavior/>
                     </i:Interaction.Behaviors>
 
-                    <ItemsControl ItemsSource="{Binding Shapes}">
+                    <ItemsControl ItemsSource="{Binding Path=CanvasModel_.Shapes}" ItemTemplateSelector="{StaticResource ShapeSelector}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <Canvas />
                             </ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
+
                         <ItemsControl.ItemContainerStyle>
                             <Style>
                                 <Setter Property="Canvas.Left" Value="{Binding X}" />
                                 <Setter Property="Canvas.Top" Value="{Binding Y}" />
                             </Style>
                         </ItemsControl.ItemContainerStyle>
-                        <ItemsControl.ItemTemplate>
-                            <DataTemplate>
-                                <Rectangle Width="{Binding Width}" Height="{Binding Height}"
-                                           Fill="{Binding Fill}" Stroke="Black" StrokeThickness="1" />
-                            </DataTemplate>
-                        </ItemsControl.ItemTemplate>
                     </ItemsControl>
+                    <Rectangle Width="1000" Height="800"
+                               Fill="Transparent" Stroke="Transparent" StrokeThickness="1"
+                               Canvas.Left="-125" Canvas.Top="-250" />
                 </Canvas>
             </Grid>
-            
         </Border>
 
         <DockPanel Grid.Row="2" HorizontalAlignment="Right" Grid.Column="1" Margin="0 0 5 0">
-            <Button x:Name="OK" Content="Ok" Style="{StaticResource bstyle1}" Margin="0 0 5 0" Command="{Binding Path=ExtractCoordinatesCommand}"/>
-            <Button x:Name="CANCEL" Content="Cancel" Style="{StaticResource bstyle1}" Command="{Binding Path=CancelCommand}"/>
+            <Button x:Name="OK" Content="Ok" Style="{StaticResource bstyle1}" Margin="0 0 5 0" Command="{Binding Path=OkCommand}"/>
+            <Button x:Name="APPLY" Content="Apply" Style="{StaticResource bstyle1}" Margin="0 0 5 0" Command="{Binding Path=ApplyCommand}"/>
+            <Button x:Name="CANCEL" Content="Cancel" Style="{StaticResource bstyle1}" Command="{Binding Path=CancelCommand_}"/>
         </DockPanel>
-
     </Grid>
+    
 </Window>

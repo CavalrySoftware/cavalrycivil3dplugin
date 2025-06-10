@@ -82,6 +82,12 @@ namespace CavalryCivil3DPlugin.Consoles
             ConsoleBasic consoleBasic = new ConsoleBasic(message);
         }
 
+        public static void ShowConsole()
+        {
+            string message = $"I am here!";
+            ConsoleBasic consoleBasic = new ConsoleBasic(message);
+        }
+
     }
 
 }

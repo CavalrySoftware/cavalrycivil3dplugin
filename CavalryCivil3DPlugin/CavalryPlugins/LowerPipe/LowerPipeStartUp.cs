@@ -18,6 +18,7 @@ namespace CavalryCivil3DPlugin.CavalryPlugins.LowerPipe
             try
             {
                 LowerPipeMainWindow mainWindow = new LowerPipeMainWindow();
+                //LowerPipeViewModel vm = new LowerPipeViewModel();
             }
 
             catch (System.Exception ex) {_Console.ShowConsole(ex);}

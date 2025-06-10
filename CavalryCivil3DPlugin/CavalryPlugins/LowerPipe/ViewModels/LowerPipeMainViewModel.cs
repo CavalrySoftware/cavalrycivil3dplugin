@@ -6,48 +6,49 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.EditorInput;
 using Autodesk.Civil.ApplicationServices;
+using Autodesk.Civil.DatabaseServices;
+using Autodesk.Civil.Settings;
 using CavalryCivil3DPlugin.CavalryPlugins.LowerPipe.Commands;
 using CavalryCivil3DPlugin.CavalryPlugins.LowerPipe.Models;
+using CavalryCivil3DPlugin.Consoles;
 
 namespace CavalryCivil3DPlugin.CavalryPlugins.LowerPipe.ViewModels
 {
     public class LowerPipeMainViewModel : INotifyPropertyChanged
     {
+
         #region << INITIALIZATION FOR INOTIFYPROPERYCHANGED >>
-        //public event PropertyChangedEventHandler PropertyChanged;
-
-        //private void OnPropertyChanged(string propertyName)
-        //{
-        //    if (PropertyChanged != null)
-        //    {
-        //        PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-        //    }
-        //}
-
-        //public event PropertyChangedEventHandler PropertyChanged;
-        //private void OnPropertyChanged([CallerMemberName] string propName = null)
-        //    => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
+        public event PropertyChangedEventHandler PropertyChanged;
+        private void OnPropertyChanged([CallerMemberName] string propName = null)
+            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
         #endregion
 
 
 
         #region << CAD DEPENDENCY PROPERTIES >>
         //    Civil3DDocument = CivilApplication.ActiveDocument;
-        private Document _AutocadDocument = Application.DocumentManager.MdiActiveDocument;
+        private Document _AutocadDocument;
         public Document AutocadDocument
         {
             get { return _AutocadDocument; }
         }
 
-        private CivilDocument _Civil3DDocument = CivilApplication.ActiveDocument;
+        private CivilDocument _Civil3DDocument;
         public CivilDocument Civil3DDocument
         {
             get { return _Civil3DDocument; }
         }
+
+        public DocumentLock MainDocumentLock;
+        public Transaction MainTransaction;
         #endregion
 
 
@@ -62,7 +63,7 @@ namespace CavalryCivil3DPlugin.CavalryPlugins.LowerPipe.ViewModels
             } 
             set 
             { 
-                _VerticalClearance = value; 
+                _VerticalClearance = value;
                 OnPropertyChanged(nameof(VerticalClearance)); 
             } 
         }
@@ -124,33 +125,73 @@ namespace CavalryCivil3DPlugin.CavalryPlugins.LowerPipe.ViewModels
 
 
 
-        #region << BACKEND PROPERTIES >>
-        PressurePipeModel UpperPipe;
-        PressurePipeModel LowerPipe;
+        #region << BACKEND AND MODEL PROPERTIES >>
+        private PressurePipeModel _UpperPipe;
+        public PressurePipeModel UpperPipe { get { return _UpperPipe; } }
 
+        private PressurePipeModel _LowerPipe;
+        public PressurePipeModel LowerPipe { get { return _LowerPipe; }} 
+
+        private CanvasModel _CanvasModel;
+        public CanvasModel CanvasModel_ { get { return _CanvasModel; }}
+
+        private LoweringAnalysisModel _LowerAnalysisModel;
+        public LoweringAnalysisModel LowerAnalysisModel { get { return _LowerAnalysisModel; } }
         #endregion
 
 
 
-        #region << COMMAND INTERFACES >>
+        #region << COMMANDS DEFINITIONS >>
         private PickPressurePipes _PickPressurePipes;
         public PickPressurePipes PickPressurePipes { get { return _PickPressurePipes; } }
 
+        public ApplyProfileCommand _ApplyProfileCommand;  
+        
+        private ICommand _ApplyCommand;
+        public ICommand ApplyCommand { get { return _ApplyCommand; } }
+
+        private ICommand _CancelCommand;
+        public ICommand CancelCommand_ { get { return _CancelCommand; } }
+
+        private ICommand _OkCommand;
+        public ICommand OkCommand { get { return _OkCommand; } }
         #endregion
 
 
 
         #region << SYSTEM VARIABLES AND PROPERTIES >>
-        private bool _ValidSelection;
+        private bool _ValidSelection = false;
         public bool ValidSelection { get { return _ValidSelection; } }
 
+
+        public bool CanApply()
+        {
+            return _ValidSelection && LowerAnalysisModel.ValidRequirements;
+        }
+
+
+        private bool _InitialEdit = false;
+
+        public bool InitialEdit
+        {
+            get { return _InitialEdit; }
+            set { _InitialEdit = value; }
+        }
+
+
+        public Action CloseAction { get; set; }
+        public Action HideAction { get; set; }
+        public Action ShowAction { get; set; }
+
+        public List<ObjectId> _NewProfileIds = new List<ObjectId>();
+
+        public bool ClosedByXButton = false;
         #endregion
 
 
 
         #region << CANVAS PROPERTIES >>
 
-        public ObservableCollection<ShapeViewModel> Shapes { get; } = new ObservableCollection<ShapeViewModel>();
 
         private double _zoom = 1.0;
         public double Zoom
@@ -172,10 +213,6 @@ namespace CavalryCivil3DPlugin.CavalryPlugins.LowerPipe.ViewModels
             get => _offsetY;
             set { _offsetY = value; OnPropertyChanged(nameof(OffsetY)); }
         }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-        private void OnPropertyChanged([CallerMemberName] string propName = null)
-            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
         #endregion
 
 
@@ -183,33 +220,68 @@ namespace CavalryCivil3DPlugin.CavalryPlugins.LowerPipe.ViewModels
         #region << CONSTRUCTOR >>
         public LowerPipeMainViewModel()
         {
+
+            _AutocadDocument = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument;
+            _Civil3DDocument = CivilApplication.ActiveDocument;
+            MainDocumentLock = _AutocadDocument.LockDocument();
+            MainTransaction = _AutocadDocument.Database.TransactionManager.StartTransaction();
+
+            InitializeViewModel();
             InitializeCommands();
             InitializeSelection();
-            InitilializeCanvas();
+            //var ss = new LowerPipeViewModel();
         }
         #endregion
+
 
 
         #region << INITIALIZE FUNCTIONS >>
 
-        private void InitializeSelection()
+        private void InitializeViewModel()
         {
-            _ValidSelection = _PickPressurePipes.Pick();
-            UpdateLogs();
+            _UpperPipe = new PressurePipeModel(_AutocadDocument);
+            _LowerPipe = new PressurePipeModel(_AutocadDocument);
+            _CanvasModel = new CanvasModel(this);
+            _LowerAnalysisModel = new LoweringAnalysisModel(this);
         }
+
 
         private void InitializeCommands()
         {
             _PickPressurePipes = new PickPressurePipes(this);
+            _ApplyProfileCommand = new ApplyProfileCommand(this);
+            _ApplyCommand = new RelayCommand(_ApplyProfileCommand.Apply, CanApply);
+            _CancelCommand = new CancelCommand(this);
+            _OkCommand = new OkCommand(this);
         }
 
-        private void InitilializeCanvas()
+
+        public void ResetCalculations()
         {
-            Shapes.Add(new ShapeViewModel { X = 100, Y = 100 });
-            Shapes.Add(new ShapeViewModel { X = 200, Y = 150, Fill = Brushes.Red });
+
+            try
+            {
+                _LowerAnalysisModel.Analyze();
+                _CanvasModel.Update();
+                UpdateLogs();
+            }
+
+            catch (Exception ex) { _Console.ShowConsole(ex.ToString()); }
+
         }
 
+
+        private void InitializeSelection()
+        {
+            _ValidSelection = _PickPressurePipes.Pick();
+            if (_ValidSelection)
+            {
+                ResetCalculations();
+            }
+            UpdateLogs();
+        }
         #endregion
+
 
 
         #region << SYSTEM FUNCTIONS >>
@@ -219,14 +291,14 @@ namespace CavalryCivil3DPlugin.CavalryPlugins.LowerPipe.ViewModels
             {
                 _Status =
                     "* Upper Pipe:" +
-                    $"\n\t- Network Name:   {UpperPipe.NetworkName}" +
-                    $"\n\t- PipeRun Name:   {UpperPipe.PipeRunName}" +
-                    $"\n\t- Outer Diameter:  {UpperPipe.OuterDiameter:0.0000} m" +
+                    $"\n\t- Network Name:   {_UpperPipe.NetworkName}" +
+                    $"\n\t- PipeRun Name:   {_UpperPipe.PipeRunName}" +
+                    $"\n\t- Outer Diameter:  {_UpperPipe.OuterDiameter:0.0000} m" +
                     "\n\n" +
                     "* Lower Pipe:" +
-                    $"\n\t- Network Name:   {LowerPipe.NetworkName}" +
-                    $"\n\t- PipeRun Name:   {LowerPipe.PipeRunName}" +
-                    $"\n\t- Outer Diameter:  {LowerPipe.OuterDiameter:0.0000} m";
+                    $"\n\t- Network Name:   {_LowerPipe.NetworkName}" +
+                    $"\n\t- PipeRun Name:   {_LowerPipe.PipeRunName}" +
+                    $"\n\t- Outer Diameter:  {_LowerPipe.OuterDiameter:0.0000} m";
             }
 
             else
@@ -235,13 +307,51 @@ namespace CavalryCivil3DPlugin.CavalryPlugins.LowerPipe.ViewModels
             }
         }
 
-        public void SetPressurePipes(ObjectId _upperPipeId, ObjectId _lowerPipeId)
+
+        public void EnterValue()
         {
-            UpperPipe = new PressurePipeModel(_upperPipeId, AutocadDocument);
-            LowerPipe = new PressurePipeModel(_lowerPipeId, AutocadDocument);
+            if (Keyboard.IsKeyDown(Key.Enter))
+            {
+                Keyboard.ClearFocus();
+                ResetCalculations();
+            }
+        }
+
+
+        public void InputLostFocus()
+        {
+            ResetCalculations();
+        }
+
+
+        public void DeleteProfiles()
+        {
+            if (_NewProfileIds.Count > 0)
+            {
+                using (Transaction tr = AutocadDocument.Database.TransactionManager.StartTransaction())
+                {
+                    foreach (ObjectId profileId in _NewProfileIds)
+                    {
+                        Profile profile = tr.GetObject(profileId, OpenMode.ForWrite) as Profile;    
+                        profile.Erase();
+                    }
+
+                    tr.Commit();
+                }
+            }
+        }
+
+
+        public void ClosingWindow()
+        {
+            if (ClosedByXButton)
+            {
+                MainTransaction.Abort();
+                MainTransaction.Dispose();
+                MainDocumentLock.Dispose();
+                AutocadDocument.Editor.Regen();
+            }
         }
         #endregion
-
-
     }
 }
