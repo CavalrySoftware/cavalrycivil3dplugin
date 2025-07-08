@@ -10,12 +10,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using Autodesk.AutoCAD.ApplicationServices;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.EditorInput;
-using Autodesk.Civil.ApplicationServices;
-using Autodesk.Civil.DatabaseServices;
-using Autodesk.Civil.Settings;
 using CavalryCivil3DPlugin.CavalryPlugins.LowerPipe.Commands;
 using CavalryCivil3DPlugin.CavalryPlugins.LowerPipe.Models;
 using CavalryCivil3DPlugin.Consoles;
@@ -33,27 +27,40 @@ namespace CavalryCivil3DPlugin.CavalryPlugins.LowerPipe.ViewModels
 
 
 
-        #region << CAD DEPENDENCY PROPERTIES >>
-        //    Civil3DDocument = CivilApplication.ActiveDocument;
-        private Document _AutocadDocument;
-        public Document AutocadDocument
+        #region << BINDING PROPERTIES >>
+        private string _ReferenceClearCover = 0.5.ToString("0.00");
+        public string ReferenceClearCover
         {
-            get { return _AutocadDocument; }
+            get
+            {
+                return _ReferenceClearCover;
+            }
+            set
+            {
+                _ReferenceClearCover = value;
+                SetCurrentField(() => ReferenceClearCover, v => ReferenceClearCover = v, nameof(ReferenceClearCover));
+                OnPropertyChanged(nameof(ReferenceClearCover));
+            }
         }
 
-        private CivilDocument _Civil3DDocument;
-        public CivilDocument Civil3DDocument
+
+        private string _ReferenceClearDepth = 0.5.ToString("0.00");
+        public string ReferenceClearDepth
         {
-            get { return _Civil3DDocument; }
+            get
+            {
+                return _ReferenceClearDepth;
+            }
+            set
+            {
+                _ReferenceClearDepth = value;
+                SetCurrentField(() => ReferenceClearDepth, v => ReferenceClearDepth = v, nameof(ReferenceClearDepth));
+                OnPropertyChanged(nameof(ReferenceClearDepth));
+            }
         }
 
-        public DocumentLock MainDocumentLock;
-        public Transaction MainTransaction;
-        #endregion
 
 
-
-        #region << FRONTEND PROPERTIES >>
         private string _VerticalClearance = 0.5.ToString("0.00");
         public string VerticalClearance 
         { 
@@ -64,22 +71,41 @@ namespace CavalryCivil3DPlugin.CavalryPlugins.LowerPipe.ViewModels
             set 
             { 
                 _VerticalClearance = value;
+                SetCurrentField(() => VerticalClearance, v => VerticalClearance = v, nameof(VerticalClearance));
                 OnPropertyChanged(nameof(VerticalClearance)); 
             } 
         }
 
 
-        private string _CrossingLength = 2.0.ToString("0.00");
-        public string CrossingLength
+        private string _CrossingLengthStart = 1.0.ToString("0.00");
+        public string CrossingLengthStart
         {
             get
             {
-                return _CrossingLength;
+                return _CrossingLengthStart;
             }
             set
             {
-                _CrossingLength = value;
-                OnPropertyChanged(nameof(CrossingLength));
+                _CrossingLengthStart = value;
+                if (_IsSymmetrical) CrossingLengthEnd = value;
+                SetCurrentField(() => CrossingLengthStart, v => CrossingLengthStart = v, nameof(CrossingLengthStart));
+                OnPropertyChanged(nameof(CrossingLengthStart));
+            }
+        }
+
+
+        private string _CrossingLengthEnd = 1.0.ToString("0.00");
+        public string CrossingLengthEnd
+        {
+            get
+            {
+                return _CrossingLengthEnd;
+            }
+            set
+            {
+                _CrossingLengthEnd = value;
+                SetCurrentField(() => CrossingLengthEnd, v => CrossingLengthEnd = v, nameof(CrossingLengthEnd));
+                OnPropertyChanged(nameof(CrossingLengthEnd));
             }
         }
 
@@ -94,11 +120,23 @@ namespace CavalryCivil3DPlugin.CavalryPlugins.LowerPipe.ViewModels
             set
             {
                 _MaxDeflection = value;
+                SetCurrentField(() => MaxDeflection, v => MaxDeflection = v, nameof(MaxDeflection));
                 OnPropertyChanged(nameof(MaxDeflection));
             }
         }
 
 
+        private string _Status;
+        public string Status
+        {
+            get { return _Status; }
+            set { _Status = value; OnPropertyChanged(nameof(Status)); }
+        }
+        #endregion
+
+
+
+        #region << BINDING BOOLEAN PROPERTIES >>
         private bool _ModifyPipe = true;
         public bool ModifyPipe
         {
@@ -115,28 +153,63 @@ namespace CavalryCivil3DPlugin.CavalryPlugins.LowerPipe.ViewModels
         }
 
 
-        private string _Status;
-        public string Status
+        private bool _IsSymmetrical = true;
+        public bool IsSymmetrical
         {
-            get { return _Status; }
-            set { _Status = value; OnPropertyChanged(nameof(Status)); }
+            get { return _IsSymmetrical; }
+            set 
+            { 
+                _IsSymmetrical = value;
+                IsNotSymmetrical = !value;
+                OnPropertyChanged(nameof(IsSymmetrical)); 
+            }
+        }
+
+
+        private bool _IsNotSymmetrical = false;
+        public bool IsNotSymmetrical
+        {
+            get { return _IsNotSymmetrical; }
+            set { _IsNotSymmetrical = value; OnPropertyChanged(nameof(IsNotSymmetrical)); }
+        }
+
+
+        private bool _IsNotPipeReference = true;
+
+        public bool IsNotPipeReference
+        {
+            get { return _IsNotPipeReference; }
+            set { _IsNotPipeReference = value; OnPropertyChanged(nameof(IsNotPipeReference)); }
+        }
+
+
+        private NotificationMethod _selectedMethod;
+        public NotificationMethod SelectedMethod
+        {
+            get => _selectedMethod;
+            set
+            {
+                _selectedMethod = value;
+            }
         }
         #endregion
 
 
 
-        #region << BACKEND AND MODEL PROPERTIES >>
-        private PressurePipeModel _UpperPipe;
-        public PressurePipeModel UpperPipe { get { return _UpperPipe; } }
+        #region << BINDING SELECTED PROPERTIES >>
+        private ObjectReferenceModel _SelectedObjectReference;
+        public ObjectReferenceModel SelectedObjectReference
+        {
+            get { return _SelectedObjectReference; }
+            set { _SelectedObjectReference = value; OnPropertyChanged(nameof(SelectedObjectReference)); }
+        }
+        #endregion
 
-        private PressurePipeModel _LowerPipe;
-        public PressurePipeModel LowerPipe { get { return _LowerPipe; }} 
 
-        private CanvasModel _CanvasModel;
-        public CanvasModel CanvasModel_ { get { return _CanvasModel; }}
 
-        private LoweringAnalysisModel _LowerAnalysisModel;
-        public LoweringAnalysisModel LowerAnalysisModel { get { return _LowerAnalysisModel; } }
+        #region << MODELS DEFINITION >>
+        private LowerPipeMainModel _LowerPipeMainModel;
+        public LowerPipeMainModel LowerPipeMainModel_ => _LowerPipeMainModel;
         #endregion
 
 
@@ -145,8 +218,8 @@ namespace CavalryCivil3DPlugin.CavalryPlugins.LowerPipe.ViewModels
         private PickPressurePipes _PickPressurePipes;
         public PickPressurePipes PickPressurePipes { get { return _PickPressurePipes; } }
 
-        public ApplyProfileCommand _ApplyProfileCommand;  
-        
+        public ApplyProfileCommand _ApplyProfileCommand;
+
         private ICommand _ApplyCommand;
         public ICommand ApplyCommand { get { return _ApplyCommand; } }
 
@@ -160,38 +233,47 @@ namespace CavalryCivil3DPlugin.CavalryPlugins.LowerPipe.ViewModels
 
 
         #region << SYSTEM VARIABLES AND PROPERTIES >>
-        private bool _ValidSelection = false;
-        public bool ValidSelection { get { return _ValidSelection; } }
-
-
         public bool CanApply()
         {
-            return _ValidSelection && LowerAnalysisModel.ValidRequirements;
+            return true;
+            //return _ValidSelection && LowerAnalysisModel.ValidRequirements;
         }
 
+        private Func<string> _GetCurrentField;
+        private Action<string> _SetCurrentField;
+        public string CurrentFieldName { get; private set; }
 
-        private bool _InitialEdit = false;
-
-        public bool InitialEdit
+        private string CurrentFieldValue
         {
-            get { return _InitialEdit; }
-            set { _InitialEdit = value; }
+            get => _GetCurrentField?.Invoke();
+            set => _SetCurrentField?.Invoke(value);
         }
 
 
+        private void SetCurrentField(Func<string> getter, Action<string> setter, string propertyName)
+        {
+            _GetCurrentField = getter;
+            _SetCurrentField = value =>
+            {
+                setter(value);
+                OnPropertyChanged(propertyName);
+            };
+            CurrentFieldName = propertyName;
+        }
+        #endregion
+
+
+
+        #region << WINDOW ACTIONS >>
         public Action CloseAction { get; set; }
         public Action HideAction { get; set; }
         public Action ShowAction { get; set; }
-
-        public List<ObjectId> _NewProfileIds = new List<ObjectId>();
-
         public bool ClosedByXButton = false;
         #endregion
 
 
 
         #region << CANVAS PROPERTIES >>
-
 
         private double _zoom = 1.0;
         public double Zoom
@@ -217,19 +299,23 @@ namespace CavalryCivil3DPlugin.CavalryPlugins.LowerPipe.ViewModels
 
 
 
+        #region << APPLY ACTIONS >>
+        public enum NotificationMethod
+        {
+            ModifyPipe,
+            ProfileRange,
+            ProfileRun
+        }
+        #endregion
+
+
+
         #region << CONSTRUCTOR >>
         public LowerPipeMainViewModel()
         {
-
-            _AutocadDocument = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument;
-            _Civil3DDocument = CivilApplication.ActiveDocument;
-            MainDocumentLock = _AutocadDocument.LockDocument();
-            MainTransaction = _AutocadDocument.Database.TransactionManager.StartTransaction();
-
-            InitializeViewModel();
+            InitializeModels();
+            InitializedSystem();
             InitializeCommands();
-            InitializeSelection();
-            //var ss = new LowerPipeViewModel();
         }
         #endregion
 
@@ -237,12 +323,15 @@ namespace CavalryCivil3DPlugin.CavalryPlugins.LowerPipe.ViewModels
 
         #region << INITIALIZE FUNCTIONS >>
 
-        private void InitializeViewModel()
+        private void InitializeModels()
         {
-            _UpperPipe = new PressurePipeModel(_AutocadDocument);
-            _LowerPipe = new PressurePipeModel(_AutocadDocument);
-            _CanvasModel = new CanvasModel(this);
-            _LowerAnalysisModel = new LoweringAnalysisModel(this);
+            _LowerPipeMainModel = new LowerPipeMainModel(this);
+        }
+
+
+        private void InitializedSystem()
+        {
+            _SelectedObjectReference = _LowerPipeMainModel.ObjectReferenceCollection.ObjectReferences.FirstOrDefault();
         }
 
 
@@ -256,102 +345,47 @@ namespace CavalryCivil3DPlugin.CavalryPlugins.LowerPipe.ViewModels
         }
 
 
-        public void ResetCalculations()
-        {
-
-            try
-            {
-                _LowerAnalysisModel.Analyze();
-                _CanvasModel.Update();
-                UpdateLogs();
-            }
-
-            catch (Exception ex) { _Console.ShowConsole(ex.ToString()); }
-
-        }
-
-
-        private void InitializeSelection()
-        {
-            _ValidSelection = _PickPressurePipes.Pick();
-            if (_ValidSelection)
-            {
-                ResetCalculations();
-            }
-            UpdateLogs();
-        }
         #endregion
 
 
 
         #region << SYSTEM FUNCTIONS >>
-        private void UpdateLogs()
-        {
-            if (_ValidSelection)
-            {
-                _Status =
-                    "* Upper Pipe:" +
-                    $"\n\t- Network Name:   {_UpperPipe.NetworkName}" +
-                    $"\n\t- PipeRun Name:   {_UpperPipe.PipeRunName}" +
-                    $"\n\t- Outer Diameter:  {_UpperPipe.OuterDiameter:0.0000} m" +
-                    "\n\n" +
-                    "* Lower Pipe:" +
-                    $"\n\t- Network Name:   {_LowerPipe.NetworkName}" +
-                    $"\n\t- PipeRun Name:   {_LowerPipe.PipeRunName}" +
-                    $"\n\t- Outer Diameter:  {_LowerPipe.OuterDiameter:0.0000} m";
-            }
-
-            else
-            {
-                _Status = "Invalid pipe selection or selection has been cancelled.";
-            }
-        }
-
 
         public void EnterValue()
         {
             if (Keyboard.IsKeyDown(Key.Enter))
             {
                 Keyboard.ClearFocus();
-                ResetCalculations();
+                FormatValues();
+
+                if (LowerPipeMainModel_.Loaded) LowerPipeMainModel_.Calculate();
+            }
+        }
+
+
+        private void FormatValues()
+        {
+            if (double.TryParse(CurrentFieldValue, out double value))
+            {
+                CurrentFieldValue = $"{value:0.00}";
             }
         }
 
 
         public void InputLostFocus()
         {
-            ResetCalculations();
+            FormatValues();
+            if (LowerPipeMainModel_.Loaded) LowerPipeMainModel_.Calculate();
         }
-
-
-        public void DeleteProfiles()
-        {
-            if (_NewProfileIds.Count > 0)
-            {
-                using (Transaction tr = AutocadDocument.Database.TransactionManager.StartTransaction())
-                {
-                    foreach (ObjectId profileId in _NewProfileIds)
-                    {
-                        Profile profile = tr.GetObject(profileId, OpenMode.ForWrite) as Profile;    
-                        profile.Erase();
-                    }
-
-                    tr.Commit();
-                }
-            }
-        }
-
 
         public void ClosingWindow()
         {
             if (ClosedByXButton)
             {
-                MainTransaction.Abort();
-                MainTransaction.Dispose();
-                MainDocumentLock.Dispose();
-                AutocadDocument.Editor.Regen();
+                _LowerPipeMainModel.CloseModel();
             }
         }
+
         #endregion
     }
 }

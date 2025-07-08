@@ -24,38 +24,26 @@ namespace CavalryCivil3DPlugin.CavalryPlugins.LowerPipe.Commands
 
         public void Apply()
         {
-            using (DocumentLock docLock = _ViewModel.AutocadDocument.LockDocument())
+            try
             {
-                try
+                switch (_ViewModel.SelectedMethod)
                 {
+                    case LowerPipeMainViewModel.NotificationMethod.ModifyPipe:
+                        _ViewModel.LowerPipeMainModel_.CreateProfile();
+                        break;
 
-                    ObjectId newProfileId = _Profile.CreateProfile
-                        (
-                        _ViewModel.AutocadDocument,
-                        _ViewModel.Civil3DDocument,
-                        _ViewModel.LowerPipe.RunAlignmentId,
-                        _ViewModel.UpperPipe.RunProfileId,
-                        _ViewModel.LowerAnalysisModel.ProfileData
-                        );
+                    case LowerPipeMainViewModel.NotificationMethod.ProfileRun:
+                        _ViewModel.LowerPipeMainModel_.CreateProfile();
+                        break;
 
-                        _ViewModel.AutocadDocument.Editor.Regen();
-
-                    if (_ViewModel.ModifyPipe)
-                    {
-                        _PressurePipe.SetProfileToPipeRun(_ViewModel.AutocadDocument, _ViewModel.LowerPipe.ObjectId_, newProfileId);
-                    }
-
-                    _ViewModel.InitialEdit = true;
-                    _ViewModel._NewProfileIds.Add( newProfileId );
+                    case LowerPipeMainViewModel.NotificationMethod.ProfileRange:
+                        _ViewModel.LowerPipeMainModel_.CreateProfile(_rangeOnly : true);
+                        break;
                 }
-
-                catch (Exception ex)
-                {
-                    _Console.ShowConsole(ex.ToString() + "\n" + ex.Message);
-                }
+                
             }
-            
-        }
 
+            catch (Exception ex) { _Console.ShowConsole(ex.ToString()); }
+        }
     }
 }

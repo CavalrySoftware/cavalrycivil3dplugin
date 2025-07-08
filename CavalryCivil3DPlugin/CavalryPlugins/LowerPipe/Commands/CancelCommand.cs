@@ -18,12 +18,10 @@ namespace CavalryCivil3DPlugin.CavalryPlugins.LowerPipe.Commands
         {
             _ViewModel = _viewModel;
         }
+
         public override void Execute(object parameter)
         {
-            _ViewModel.MainTransaction.Abort();
-            _ViewModel.MainTransaction.Dispose();
-            _ViewModel.MainDocumentLock.Dispose();
-            _ViewModel.AutocadDocument.Editor.Regen();
+            _ViewModel.LowerPipeMainModel_.CloseModel();
             _ViewModel.CloseAction.Invoke();
         }
     }

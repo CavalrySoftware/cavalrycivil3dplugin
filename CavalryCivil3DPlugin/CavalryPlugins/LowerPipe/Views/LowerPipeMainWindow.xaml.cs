@@ -23,6 +23,7 @@ namespace CavalryCivil3DPlugin.CavalryPlugins.LowerPipe.Views
     /// </summary>
     public partial class LowerPipeMainWindow : Window
     {
+
         LowerPipeMainViewModel mainViewModel;
 
         public LowerPipeMainWindow()
@@ -38,8 +39,6 @@ namespace CavalryCivil3DPlugin.CavalryPlugins.LowerPipe.Views
             {
                 mainViewModel.ClosingWindow();
             };
-
-            this.Show();
         }
 
         private void ClippingBorder_SizeChanged(object sender, SizeChangedEventArgs e)

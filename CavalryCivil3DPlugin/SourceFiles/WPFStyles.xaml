@@ -65,6 +65,19 @@
         <Setter Property="BorderBrush" Value="{StaticResource Blue1}"/>
         <Setter Property="BorderThickness" Value="2"/>
     </Style>
+
+    <Style TargetType="Border" x:Key="Sunken">
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
+        <Setter Property="BorderBrush">
+            <Setter.Value>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Color="#888888" Offset="0"/>
+                    <GradientStop Color="#FFFFFF" Offset="1"/>
+                </LinearGradientBrush>
+            </Setter.Value>
+        </Setter>
+    </Style>
     <!--#endregion-->
 
     
@@ -209,7 +222,7 @@
                                         CornerRadius="7.5"
                                         Background="Transparent">
                                 <!-- Dot for checked state with Red Color -->
-                                <Ellipse x:Name="Dot" Width="8" Height="8" Fill="{StaticResource Green1}" Visibility="Collapsed" />
+                                <Ellipse x:Name="Dot" Width="8" Height="8" Fill="{StaticResource Blue1}" Visibility="Collapsed" />
                             </Border>
                         </BulletDecorator.Bullet>
                         <ContentPresenter VerticalAlignment="Center" Margin="5,0,0,0"/>
@@ -218,7 +231,7 @@
                     <ControlTemplate.Triggers>
                         <!-- Hover Trigger for BorderBrush color -->
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="Border" Property="BorderBrush" Value="{StaticResource Green2}"/>
+                            <Setter TargetName="Border" Property="BorderBrush" Value="{StaticResource Blue4}"/>
                         </Trigger>
                         <!-- Checked Trigger to show the Dot -->
                         <Trigger Property="IsChecked" Value="True">

@@ -22,29 +22,20 @@ namespace CavalryCivil3DPlugin.CavalryPlugins.LowerPipe.Models
             get { return _ObjectId; }
         }
 
-
         private ObjectId _RunProfileId = ObjectId.Null;
-        public ObjectId RunProfileId
-        {
-            get { return _RunProfileId; }
-        }
-
+        public ObjectId RunProfileId => _RunProfileId;
 
         private ObjectId _RunAlignmentId = ObjectId.Null;
-        public ObjectId RunAlignmentId
-        {
-            get { return _RunAlignmentId; }
-        }
+        public ObjectId RunAlignmentId => _RunAlignmentId;
 
+		private ObjectId _GroundProfileId = ObjectId.Null;
+		public ObjectId GroundProfileId => _GroundProfileId;
         #endregion
 
 
         #region << INFORMATION PROPERTIES >>
         private double _OuterDiameter;
-		public double OuterDiameter
-		{
-			get { return _OuterDiameter; }
-		}
+		public double OuterDiameter => _OuterDiameter;
 
 		private string _PipeRunName;
 
@@ -90,6 +81,8 @@ namespace CavalryCivil3DPlugin.CavalryPlugins.LowerPipe.Models
 			{
                 _RunProfileId = _PressurePipe.GetProfileId(_ObjectId, AutocadDocument);
                 _RunAlignmentId = _PressurePipe.GetAlignmentId(_ObjectId, AutocadDocument);
+				_GroundProfileId = _PressurePipe.GetGroundProfileId(_ObjectId, AutocadDocument);
+
                 Alignment alignment = tr.GetObject(_RunAlignmentId, OpenMode.ForRead) as Alignment;
 				PressurePipe pressurePipe = tr.GetObject(_ObjectId, OpenMode.ForRead) as PressurePipe;
 

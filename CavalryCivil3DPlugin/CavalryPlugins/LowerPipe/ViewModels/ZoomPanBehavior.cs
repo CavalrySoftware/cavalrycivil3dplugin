@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.Xaml.Behaviors;
 using System.Windows.Input;
 using System.Windows;
+using CavalryCivil3DPlugin.Consoles;
 
 namespace CavalryCivil3DPlugin.CavalryPlugins.LowerPipe.ViewModels
 {

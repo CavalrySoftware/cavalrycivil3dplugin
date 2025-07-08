@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Media.Media3D;
 using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.Geometry;
 using CavalryCivil3DPlugin.ACADLibrary._ObjectData;
 using CavalryCivil3DPlugin.Consoles;
 
@@ -27,7 +29,7 @@ namespace CavalryCivil3DPlugin.ACADLibrary.Selection
         {
             List<ObjectId> allPolylineIds = new List<ObjectId>();
 
-            
+
             PromptSelectionResult allPolylineResult = _document.Editor.SelectAll(_polylineFilter);
 
             if (allPolylineResult.Status == PromptStatus.OK)
@@ -36,7 +38,7 @@ namespace CavalryCivil3DPlugin.ACADLibrary.Selection
                 allPolylineIds = allPolyLineSelectionSet.GetObjectIds().ToList();
             }
 
-            return allPolylineIds;  
+            return allPolylineIds;
         }
 
 
@@ -60,7 +62,7 @@ namespace CavalryCivil3DPlugin.ACADLibrary.Selection
         {
             List<ObjectId> allPolylineIds = new List<ObjectId>();
 
-            List<TypedValue> typedValues = new List<TypedValue>() {_polyLineType, new TypedValue((int)DxfCode.Operator, "<OR")};
+            List<TypedValue> typedValues = new List<TypedValue>() { _polyLineType, new TypedValue((int)DxfCode.Operator, "<OR") };
 
 
             foreach (string layerName in LayerNames)
@@ -90,7 +92,7 @@ namespace CavalryCivil3DPlugin.ACADLibrary.Selection
             List<ObjectId> allPolylineIds = GetAllPolylineId(_autocadDocument);
             List<AutocadEntity> allPolyLineEntity = new List<AutocadEntity>();
 
-            using(Transaction tr = _autocadDocument.Database.TransactionManager.StartTransaction())
+            using (Transaction tr = _autocadDocument.Database.TransactionManager.StartTransaction())
             {
                 foreach (ObjectId polylineId in allPolylineIds)
                 {
@@ -98,7 +100,7 @@ namespace CavalryCivil3DPlugin.ACADLibrary.Selection
                     allPolyLineEntity.Add(polylineEntity);
                 }
             }
-            return allPolyLineEntity;   
+            return allPolyLineEntity;
         }
 
 
@@ -106,9 +108,9 @@ namespace CavalryCivil3DPlugin.ACADLibrary.Selection
         {
             List<(ObjectId, string)> allPolylineIds = new List<(ObjectId, string)>();
 
-            List<TypedValue> typedValues = new List<TypedValue>() 
-            { 
-                _polyLineType, 
+            List<TypedValue> typedValues = new List<TypedValue>()
+            {
+                _polyLineType,
                 new TypedValue((int)DxfCode.Operator, "<NOT") ,
                 _blockReferenceType,
                 //_xrefType,
@@ -117,9 +119,9 @@ namespace CavalryCivil3DPlugin.ACADLibrary.Selection
 
             SelectionFilter polylineFilter = new SelectionFilter(typedValues.ToArray());
 
-            List<ObjectId> polylineIds =GetAllPolylineId(_autocadDocument, polylineFilter);
+            List<ObjectId> polylineIds = GetAllPolylineId(_autocadDocument, polylineFilter);
 
-            
+
             foreach (ObjectId polylineId in polylineIds)
             {
                 try
@@ -127,18 +129,18 @@ namespace CavalryCivil3DPlugin.ACADLibrary.Selection
                     var allTables = _ObjectDataTable.GetObjectDataValuesfromPolyline(_autocadDocument, polylineId);
 
                     string sam = allTables.Keys.FirstOrDefault() as string;
-                    
+
 
                     Dictionary<string, string> table = allTables[_tableName];
 
                     string _filterValue = table[_filterKey];
 
-                     if (!string.IsNullOrEmpty(_filterValue))
+                    if (!string.IsNullOrEmpty(_filterValue))
                     {
                         allPolylineIds.Add((polylineId, _filterValue));
                     }
                 }
-                
+
                 catch { }
             }
 
@@ -153,7 +155,7 @@ namespace CavalryCivil3DPlugin.ACADLibrary.Selection
             PromptSelectionOptions promptOptions = new PromptSelectionOptions();
             promptOptions.MessageForAdding = "\nSelect Polylines";
 
-            PromptSelectionResult selectionResult =  _autocadDocument.Editor.GetSelection(promptOptions, _polylineFilter);
+            PromptSelectionResult selectionResult = _autocadDocument.Editor.GetSelection(promptOptions, _polylineFilter);
 
             if (selectionResult.Status == PromptStatus.OK)
             {
@@ -206,9 +208,37 @@ namespace CavalryCivil3DPlugin.ACADLibrary.Selection
         }
 
 
-        public static ObjectId PickLine(Document _autocadDocument)
+        public static (ObjectId, Point3d) PickElementGetPoint(Document _autocadDocument, Type _elementType, string elementName)
+        {
+            string selectMessage = ($"\nSelect {elementName}");
+            string rejectMessage = ($"\nSelect only {elementName}");
+
+            PromptSelectionOptions promptOptions = new PromptSelectionOptions();
+
+            PromptEntityOptions promptEntityOptions = new PromptEntityOptions($"\n{selectMessage}");
+            promptEntityOptions.SetRejectMessage($"\n{rejectMessage}");
+            promptEntityOptions.AddAllowedClass(_elementType, true);
+
+            PromptEntityResult selectionResult = _autocadDocument.Editor.GetEntity(promptEntityOptions);
+
+            if (selectionResult.Status == PromptStatus.OK)
+            {
+                return (selectionResult.ObjectId, selectionResult.PickedPoint);
+            }
+
+            return (ObjectId.Null, new Point3d(0, 0, 0));
+        }
+
+
+        public static ObjectId PickLine(Document _autocadDocument, string _selectPrompt = "Line")
         {
             return PickElement(_autocadDocument, typeof(Line), "Line");
+        }
+
+
+        public static (ObjectId, Point3d) PickPolylineGetPoint(Document _autocadDocument, string _selectPrompt = "Polyline")
+        {
+            return PickElementGetPoint(_autocadDocument, typeof(Polyline), _selectPrompt);
         }
 
 

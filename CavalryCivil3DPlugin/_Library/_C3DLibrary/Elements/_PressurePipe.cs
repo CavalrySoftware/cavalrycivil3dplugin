@@ -80,6 +80,48 @@ namespace CavalryCivil3DPlugin._C3DLibrary.Elements
         }
 
 
+        public static ObjectId GetGroundProfileId(ObjectId _pipe, Document _autocadDocument)
+        {
+            Database db = _autocadDocument.Database;
+
+            using (Transaction tr = db.TransactionManager.StartTransaction())
+            {
+                PressurePipe pressurePipe = tr.GetObject(_pipe, OpenMode.ForRead) as PressurePipe;
+
+                PressurePipeNetwork pressureNetwork = tr.GetObject(pressurePipe.NetworkId, OpenMode.ForRead) as PressurePipeNetwork;
+                PressurePipeRunCollection pipeRuns = pressureNetwork.PipeRuns;
+
+                foreach (PressurePipeRun pressurePipeRun in pipeRuns)
+                {
+                    var parts = pressurePipeRun.GetPartIds();
+
+                    foreach (ObjectId part in parts)
+                    {
+                        if (_pipe.Equals(part))
+                        {
+                            ObjectId alignmentId =  pressurePipeRun.AlignmentId;
+
+                            Alignment alignment = tr.GetObject(alignmentId, OpenMode.ForRead) as Alignment;
+                            var profiles = alignment.GetProfileIds();
+
+                            foreach(ObjectId profileid in profiles)
+                            {
+                                Profile profile = tr.GetObject(profileid, OpenMode.ForRead) as Profile; 
+
+                                if (profile.ProfileType == ProfileType.EG)
+                                {
+                                    return profileid;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                return ObjectId.Null;
+            }
+        }
+
+
         public static ObjectId GetPipeRunId(ObjectId _pipe, Document _autocadDocument)
         {
             Database db = _autocadDocument.Database;
@@ -153,6 +195,49 @@ namespace CavalryCivil3DPlugin._C3DLibrary.Elements
                 Point3d pipeLowerp2 = pressurePipeLower.EndPoint;
 
                 (Point2d, Point2d) line1 = (new Point2d(pipeUpperp1.X, pipeUpperp1.Y), new Point2d(pipeUpperp2.X, pipeUpperp2.Y));
+                (Point2d, Point2d) line2 = (new Point2d(pipeLowerp1.X, pipeLowerp1.Y), new Point2d(pipeLowerp2.X, pipeLowerp2.Y));
+
+                Point2d intersectionPoint = Lines.GetIntersectionPoint(line1, line2);
+
+                return intersectionPoint;
+            }
+        }
+
+
+        public static Point2d GetIntersectionPointToLine(Document _autocadDocument, ObjectId _pressurePipeId, ObjectId _lineId)
+        {
+            using (Transaction tr = _autocadDocument.Database.TransactionManager.StartTransaction())
+            {
+                Line referenceLine = tr.GetObject(_lineId, OpenMode.ForRead) as Line;
+                PressurePipe pressurePipeLower = tr.GetObject(_pressurePipeId, OpenMode.ForRead) as PressurePipe;
+
+                Point3d refLinep1 = referenceLine.StartPoint;
+                Point3d refLinep2 = referenceLine.EndPoint;
+                Point3d pipeLowerp1 = pressurePipeLower.StartPoint;
+                Point3d pipeLowerp2 = pressurePipeLower.EndPoint;
+
+                (Point2d, Point2d) line1 = (new Point2d(refLinep1.X, refLinep1.Y), new Point2d(refLinep2.X, refLinep2.Y));
+                (Point2d, Point2d) line2 = (new Point2d(pipeLowerp1.X, pipeLowerp1.Y), new Point2d(pipeLowerp2.X, pipeLowerp2.Y));
+
+                Point2d intersectionPoint = Lines.GetIntersectionPoint(line1, line2);
+
+                return intersectionPoint;
+            }
+        }
+
+
+        public static Point2d GetIntersectionPointToLinePoints(Document _autocadDocument, ObjectId _pressurePipeId, (Point3d, Point3d) _linePoints)
+        {
+            using (Transaction tr = _autocadDocument.Database.TransactionManager.StartTransaction())
+            {
+                PressurePipe pressurePipeLower = tr.GetObject(_pressurePipeId, OpenMode.ForRead) as PressurePipe;
+
+                Point3d refLinep1 = _linePoints.Item1;
+                Point3d refLinep2 = _linePoints.Item2;
+                Point3d pipeLowerp1 = pressurePipeLower.StartPoint;
+                Point3d pipeLowerp2 = pressurePipeLower.EndPoint;
+
+                (Point2d, Point2d) line1 = (new Point2d(refLinep1.X, refLinep1.Y), new Point2d(refLinep2.X, refLinep2.Y));
                 (Point2d, Point2d) line2 = (new Point2d(pipeLowerp1.X, pipeLowerp1.Y), new Point2d(pipeLowerp2.X, pipeLowerp2.Y));
 
                 Point2d intersectionPoint = Lines.GetIntersectionPoint(line1, line2);

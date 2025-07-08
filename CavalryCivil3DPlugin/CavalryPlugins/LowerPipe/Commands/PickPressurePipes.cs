@@ -26,31 +26,28 @@ namespace CavalryCivil3DPlugin.CavalryPlugins.LowerPipe.Commands
         public override void Execute(object parameter)
         {
             _ViewModel.HideAction.Invoke();
-            if (Pick())
-            {
-                _ViewModel.ResetCalculations();
-            }
+            _ViewModel.LowerPipeMainModel_.SetObjects();
             _ViewModel.ShowAction.Invoke();
         }
 
         public bool Pick()
         {
-            ObjectId pipeUpperId = C3DObjectSelection.PickPressurePipe(_ViewModel.AutocadDocument, "Pressure Pipe to be on top");
+            //ObjectId pipeUpperId = C3DObjectSelection.PickPressurePipe(_ViewModel.AutocadDocument, "Pressure Pipe to be on top");
 
-            if (pipeUpperId == ObjectId.Null)
-            {
-                return false;
-            }
+            //if (pipeUpperId == ObjectId.Null)
+            //{
+            //    return false;
+            //}
 
-            ObjectId pipeLowerId = C3DObjectSelection.PickPressurePipe(_ViewModel.AutocadDocument, "Pressure Pipe to be lowered");
+            //ObjectId pipeLowerId = C3DObjectSelection.PickPressurePipe(_ViewModel.AutocadDocument, "Pressure Pipe to be lowered");
 
-            if (pipeLowerId == ObjectId.Null)
-            {
-                return false;
-            }
+            //if (pipeLowerId == ObjectId.Null)
+            //{
+            //    return false;
+            //}
 
-            _ViewModel.UpperPipe.SetPipe(pipeUpperId);
-            _ViewModel.LowerPipe.SetPipe(pipeLowerId);  
+            //_ViewModel.UpperPipe.SetPipe(pipeUpperId);
+            //_ViewModel.LowerPipe.SetPipe(pipeLowerId);  
             
             return true;
         }

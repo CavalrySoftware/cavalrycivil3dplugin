@@ -9,12 +9,13 @@
              mc:Ignorable="d"
              xmlns:converter="clr-namespace:CavalryCivil3DPlugin.WPFSupportFunctions.Supports"
              Width="700"
-             Height="550"
+             Height="700"
              Title="Cavalry - Lowering of Pipes"
              MaxHeight="700"
              MaxWidth="800"
-             MinWidth="475"
+             MinWidth="535"
              MinHeight="500"
+             WindowStartupLocation="CenterScreen"
              Icon="pack://application:,,,/CavalryCivil3DPlugin;component/Icons/CavalryLogo_16.ico">
 
     
@@ -54,6 +55,9 @@
                                           LineTemplate="{StaticResource LineTemplate}"
                                           TextTemplate="{StaticResource TextTemplate}"
                                           CircleTemplate="{StaticResource CircleTemplate}"/>
+             
+            <converter:EnumToBooleanConverter x:Key="EnumToBooleanConverter" />
+             
         </ResourceDictionary>
     </Window.Resources>
 
@@ -61,99 +65,230 @@
 
     <Grid Margin="0 5 0 5">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition MinWidth="200"/>
+            <ColumnDefinition MinWidth="270"/>
             <ColumnDefinition MinWidth="250"/>
         </Grid.ColumnDefinitions>
 
         <Grid.RowDefinitions>
-            <RowDefinition MinHeight="200"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition MinHeight="200" Height="Auto"/>
             <RowDefinition/>
             <RowDefinition Height="20"/>
         </Grid.RowDefinitions>
 
-        <Border Grid.Row="0" Grid.Column="0" Margin="5">
-            <Grid Margin="7">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="30"/>
-                    <RowDefinition Height="30"/>
-                    <RowDefinition Height="30"/>
-                    <RowDefinition Height="*"/>
-                    
-                </Grid.RowDefinitions>
-
-                <DockPanel Margin="0 3 0 3" Grid.Row="0">
-                    <TextBlock Text="Vertical Clearance: " Height="20"/>
-                    <TextBlock Text="m" DockPanel.Dock="Right" Margin="4 0 2 0" Foreground="{StaticResource DarkAccent}" Height="20"/>
-                    <TextBox Text="{Binding Path=VerticalClearance, UpdateSourceTrigger=PropertyChanged}" Foreground="{StaticResource Blue1}" VerticalContentAlignment="Center">
-                        <i:Interaction.Triggers>
-                            <i:EventTrigger EventName="KeyDown">
-                                <i:CallMethodAction 
-                                    MethodName="EnterValue" 
-                                    TargetObject="{Binding}" />
-                            </i:EventTrigger>
-
-                            <i:EventTrigger EventName="LostFocus">
-                                <i:CallMethodAction TargetObject="{Binding}" MethodName="InputLostFocus" />
-                            </i:EventTrigger>
-                        </i:Interaction.Triggers>
-                    </TextBox>
-                </DockPanel>
-
-                <DockPanel Grid.Row="1" Margin="0 3 0 3">
-                    <TextBlock Text="Crossing Length: " Margin="0 0 8 0" Height="20"/>
-                    <TextBlock Text="m" DockPanel.Dock="Right" Margin="4 0 2 0" Foreground="{StaticResource DarkAccent}" Height="20" />
-                    <TextBox Text="{Binding Path=CrossingLength, UpdateSourceTrigger=PropertyChanged}" Foreground="{StaticResource Blue1}" VerticalContentAlignment="Center">
-                        <i:Interaction.Triggers>
-                            <i:EventTrigger EventName="KeyDown">
-                                <i:CallMethodAction 
-                                        MethodName="EnterValue" 
-                                        TargetObject="{Binding}" />
-                            </i:EventTrigger>
-                            
-                            <i:EventTrigger EventName="LostFocus">
-                                <i:CallMethodAction TargetObject="{Binding}" MethodName="InputLostFocus" />
-                            </i:EventTrigger>
-                            
-                        </i:Interaction.Triggers>
-                    </TextBox>
-                </DockPanel>
-
-                <DockPanel Margin="0 3 0 3" Grid.Row="2">
-                    <TextBlock Text="Max Deflection: " Margin="0 0 13.5 0" Height="20"/>
-                    <TextBlock Text="d°" DockPanel.Dock="Right" Margin="2.75 0 2 0" Foreground="{StaticResource DarkAccent}" Height="20"/>
-                    <TextBox Text="{Binding Path=MaxDeflection, UpdateSourceTrigger=PropertyChanged}" Foreground="{StaticResource Blue1}" VerticalContentAlignment="Center">
-                        <i:Interaction.Triggers>
-                            
-                            <i:EventTrigger EventName="KeyDown">
-                                <i:CallMethodAction 
-                                    MethodName="EnterValue" 
-                                    TargetObject="{Binding}" />
-                            </i:EventTrigger>
-                            
-                            <i:EventTrigger EventName="LostFocus">
-                                <i:CallMethodAction TargetObject="{Binding}" MethodName="InputLostFocus" />
-                            </i:EventTrigger>
-                            
-                        </i:Interaction.Triggers>
-                    </TextBox>
-                </DockPanel>
-
-                <StackPanel Grid.Row="3" VerticalAlignment="Bottom" Margin="0 0 0 5">
-                    <CheckBox Content="Modify Pipe" Margin="0 8 0 8" IsChecked="{Binding Path=ModifyPipe}"/>
-                    <CheckBox Content="Delete Profile" IsChecked="{Binding Path=DeleteProfile}"/>
-                </StackPanel>
-            </Grid>
-        </Border>
-
         
-        <Grid Grid.Column="1" Grid.Row="0">
+        <Grid Grid.Column="0" Grid.Row="0" Margin="5 5 5 0">
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+
+            <DockPanel Grid.Row="0" Margin="5 3 5.5 3">
+                <TextBlock Text="Reference Object:   "/>
+                <ComboBox ItemsSource="{Binding Path=LowerPipeMainModel_.ObjectReferenceCollection.ObjectReferences}" SelectedItem="{Binding Path=SelectedObjectReference}" Style="{StaticResource CustomComboBoxStyle}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Path=ReferenceName}"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+            </DockPanel>
+
+            <CheckBox Content="Symmetrical" Grid.Row="1" Margin="5 10 0 5" IsChecked="{Binding Path=IsSymmetrical}"/>
+
+        </Grid>
+
+        <Grid Grid.Row="1" Grid.Column="0" Margin="5 0 5 5">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <Border Grid.Row="0" Grid.Column="0" Margin="5 0 5 5" Style="{StaticResource Basic}" BorderThickness="0.5" BorderBrush="#21618c">
+                <Grid>
+                    <Rectangle HorizontalAlignment="Stretch" VerticalAlignment="Top" Height="1.5" Fill="#5E5E5E"/>
+                    <Rectangle HorizontalAlignment="Left" VerticalAlignment="Stretch" Width="1.5" Fill="#5E5E5E"/>
+                    <Rectangle HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Height="1" Fill="White"/>
+                    <Rectangle HorizontalAlignment="Right" VerticalAlignment="Stretch" Width="1" Fill="White"/>
+
+                    <!-- Content area -->
+                    <Border Background="Transparent" CornerRadius="0" BorderThickness="0.75" BorderBrush="#1b4f72">
+                        <Grid Margin="7">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="30"/>
+                                <RowDefinition Height="30"/>
+                                <RowDefinition Height="30"/>
+                                <RowDefinition Height="30"/>
+                                <RowDefinition Height="30"/>
+                                <RowDefinition Height="30"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+
+
+                            <DockPanel Margin="0 3 0 3" Grid.Row="0">
+                                <TextBlock Text="Depth of Cover Ref. Object: " Height="20"/>
+                                <TextBlock Text="m" DockPanel.Dock="Right" Margin="4 0 2 0" Foreground="{StaticResource DarkAccent}" Height="20"/>
+                                <TextBox Text="{Binding Path=ReferenceClearCover, UpdateSourceTrigger=PropertyChanged}" Foreground="{StaticResource Blue1}" VerticalContentAlignment="Center" Margin="30 0 0 0" IsEnabled="{Binding Path=IsNotPipeReference}">
+                                    <i:Interaction.Triggers>
+                                        <i:EventTrigger EventName="KeyDown">
+                                            <i:CallMethodAction 
+                                                MethodName="EnterValue" 
+                                                TargetObject="{Binding}">
+                                            </i:CallMethodAction>
+                                        </i:EventTrigger>
+
+                                        <i:EventTrigger EventName="LostFocus">
+                                            <i:CallMethodAction TargetObject="{Binding}" MethodName="InputLostFocus" />
+                                        </i:EventTrigger>
+                                    </i:Interaction.Triggers>
+                                </TextBox>
+                            </DockPanel>
+
+
+                            <DockPanel Margin="0 3 0 3" Grid.Row="1">
+                                <TextBlock Text="Ref Object Thickness/Diameter: " Height="20"/>
+                                <TextBlock Text="m" DockPanel.Dock="Right" Margin="4 0 2 0" Foreground="{StaticResource DarkAccent}" Height="20"/>
+                                <TextBox Text="{Binding Path=ReferenceClearDepth, UpdateSourceTrigger=PropertyChanged}" Foreground="{StaticResource Blue1}" VerticalContentAlignment="Center" Margin="9.25 0 0 0" IsEnabled="{Binding Path=IsNotPipeReference}">
+                                    <i:Interaction.Triggers>
+                                        <i:EventTrigger EventName="KeyDown">
+                                            <i:CallMethodAction 
+                                                MethodName="EnterValue" 
+                                                TargetObject="{Binding}" /> 
+                                        </i:EventTrigger>
+
+                                        <i:EventTrigger EventName="LostFocus">
+                                            <i:CallMethodAction TargetObject="{Binding}" MethodName="InputLostFocus" />
+                                        </i:EventTrigger>
+                                    </i:Interaction.Triggers>
+                                </TextBox>
+                            </DockPanel>
+
+
+                            <DockPanel Margin="0 3 0 3" Grid.Row="2">
+                                <TextBlock Text="Ref Object to Pipe Clearance: " Height="20"/>
+                                <TextBlock Text="m" DockPanel.Dock="Right" Margin="4 0 2 0" Foreground="{StaticResource DarkAccent}" Height="20"/>
+                                <TextBox Text="{Binding Path=VerticalClearance, UpdateSourceTrigger=PropertyChanged}" Foreground="{StaticResource Blue1}" VerticalContentAlignment="Center" Margin="21 0 0 0">
+                                    <i:Interaction.Triggers>
+                                        <i:EventTrigger EventName="KeyDown">
+                                            <i:CallMethodAction 
+                                                MethodName="EnterValue" 
+                                                TargetObject="{Binding}" /> 
+                                        </i:EventTrigger>
+
+                                        <i:EventTrigger EventName="LostFocus">
+                                            <i:CallMethodAction TargetObject="{Binding}" MethodName="InputLostFocus" />
+                                        </i:EventTrigger>
+                                    </i:Interaction.Triggers>
+                                </TextBox>
+                            </DockPanel>
+
+                            <DockPanel Grid.Row="3" Margin="0 3 0 3">
+                                <TextBlock Text="Crossing Length (Start): " Margin="0 0 8 0" Height="20"/>
+                                <TextBlock Text="m" DockPanel.Dock="Right" Margin="4 0 2 0" Foreground="{StaticResource DarkAccent}" Height="20" />
+                                <TextBox Text="{Binding Path=CrossingLengthStart, UpdateSourceTrigger=PropertyChanged}" Foreground="{StaticResource Blue1}" VerticalContentAlignment="Center" Margin="43.1 0 0 0">
+                                    <i:Interaction.Triggers>
+                                        <i:EventTrigger EventName="KeyDown">
+                                            <i:CallMethodAction 
+                                                MethodName="EnterValue" 
+                                                TargetObject="{Binding}" /> 
+                                        </i:EventTrigger>
+
+                                        <i:EventTrigger EventName="LostFocus">
+                                            <i:CallMethodAction TargetObject="{Binding}" MethodName="InputLostFocus" />
+                                        </i:EventTrigger>
+
+                                    </i:Interaction.Triggers>
+                                </TextBox>
+                            </DockPanel>
+
+                            <DockPanel Grid.Row="4" Margin="0 3 0 3">
+                                <TextBlock Text="Crossing Length (End): " Margin="0 0 8 0" Height="20"/>
+                                <TextBlock Text="m" DockPanel.Dock="Right" Margin="4 0 2 0" Foreground="{StaticResource DarkAccent}" Height="20" />
+                                <TextBox Text="{Binding Path=CrossingLengthEnd, UpdateSourceTrigger=PropertyChanged}" Foreground="{StaticResource Blue1}" VerticalContentAlignment="Center" Margin="47.6 0 0 0" IsEnabled="{Binding Path=IsNotSymmetrical}">
+                                    <i:Interaction.Triggers>
+                                        <i:EventTrigger EventName="KeyDown">
+                                            <i:CallMethodAction 
+                                                MethodName="EnterValue" 
+                                                TargetObject="{Binding}" /> 
+                                        </i:EventTrigger>
+
+                                        <i:EventTrigger EventName="LostFocus">
+                                            <i:CallMethodAction TargetObject="{Binding}" MethodName="InputLostFocus" />
+                                        </i:EventTrigger>
+
+                                    </i:Interaction.Triggers>
+                                </TextBox>
+                            </DockPanel>
+
+                            <DockPanel Margin="0 3 0 3" Grid.Row="5">
+                                <TextBlock Text="Max Deflection: " Margin="0 0 13.5 0" Height="20"/>
+                                <TextBlock Text="d°" DockPanel.Dock="Right" Margin="2.75 0 2 0" Foreground="{StaticResource DarkAccent}" Height="20"/>
+                                <TextBox Text="{Binding Path=MaxDeflection, UpdateSourceTrigger=PropertyChanged}" Foreground="{StaticResource Blue1}" VerticalContentAlignment="Center" Margin="78.5 0 0 0">
+                                    <i:Interaction.Triggers>
+
+                                        <i:EventTrigger EventName="KeyDown">
+                                            <i:CallMethodAction 
+                                                MethodName="EnterValue" 
+                                                TargetObject="{Binding}" /> 
+                                        </i:EventTrigger>
+
+                                        <i:EventTrigger EventName="LostFocus">
+                                            <i:CallMethodAction TargetObject="{Binding}" MethodName="InputLostFocus" />
+                                        </i:EventTrigger>
+
+                                    </i:Interaction.Triggers>
+                                </TextBox>
+                            </DockPanel>
+                        </Grid>
+                    </Border>
+                </Grid>
+                
+                
+            </Border>
+
+            <StackPanel Grid.Row="1" VerticalAlignment="Bottom" Margin="5 0 0 5">
+                <RadioButton Content="Modify Pipe" Margin="0 8 0 3" 
+                             GroupName="ApplyAction"
+                             IsChecked="{Binding SelectedMethod,
+                             Converter={StaticResource EnumToBooleanConverter},
+                             ConverterParameter=ModifyPipe}"/>
+
+                <RadioButton Content= "Generate Profile range" 
+                             GroupName="ApplyAction" Margin="0 0 0 3" 
+                             IsChecked="{Binding SelectedMethod,
+                             Converter={StaticResource EnumToBooleanConverter},
+                             ConverterParameter=ProfileRange}"/>
+
+                <RadioButton Content= "Generate Run Profile" 
+                             GroupName="ApplyAction"
+                             IsChecked="{Binding SelectedMethod,
+                             Converter={StaticResource EnumToBooleanConverter},
+                             ConverterParameter=ProfileRun}"/>   
+            </StackPanel>
+
+        </Grid>
+
+
+        <Grid Grid.Column="1" Grid.Row="0" Grid.RowSpan="2" Margin="0 0 5 0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="25"/>
             </Grid.RowDefinitions>
-            <Border Grid.Row="0" Margin="0 5 5 5" Padding="5" Background="#F0F8FF">
-                <TextBlock Text="{Binding Path=Status}" VerticalAlignment="Stretch" TextWrapping="Wrap" Foreground="{StaticResource Blue1}"/>
+            <Border Grid.Row="0" Grid.Column="0" Margin="5" Style="{StaticResource Basic}" BorderThickness="0.5" BorderBrush="#21618c" Background="#f2f4f4">
+                <Grid>
+                    <Rectangle HorizontalAlignment="Stretch" VerticalAlignment="Top" Height="1.5" Fill="#5E5E5E"/>
+                    <Rectangle HorizontalAlignment="Left" VerticalAlignment="Stretch" Width="1.5" Fill="#5E5E5E"/>
+                    <Rectangle HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Height="1" Fill="White"/>
+                    <Rectangle HorizontalAlignment="Right" VerticalAlignment="Stretch" Width="1" Fill="White"/>
+
+                    <!-- Content area -->
+                    <Border Background="Transparent" CornerRadius="0" BorderThickness="0.75" BorderBrush="#1b4f72" Padding ="5 5 0 5">
+                        <ScrollViewer VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Height="300" Template="{StaticResource ScrollViewTemplate}" VerticalScrollBarVisibility="Visible">
+                            <TextBlock Text="{Binding Path=LowerPipeMainModel_.LoggerModel_.MainMessage}" TextWrapping="Wrap" Foreground="{Binding Path=LowerPipeMainModel_.LoggerModel_.LogTextBrush}" VerticalAlignment="Top"/>
+                        </ScrollViewer>
+                    </Border>
+                </Grid>
             </Border>
+            
             <Button Width="18" 
                     VerticalAlignment="Center" 
                     DockPanel.Dock="Right" 
@@ -168,42 +303,54 @@
         
 
         <!-- Fixed canvas frame -->
-        <Border Grid.Row="1" Background="Black" Grid.ColumnSpan="2" Margin="5" Style="{StaticResource Basic}">
-            <Grid ClipToBounds="True">
-                <Canvas x:Name="DrawingCanvas" Background="Transparent">
-                    <Canvas.RenderTransform>
-                        <TransformGroup>
-                            <ScaleTransform ScaleX="{Binding Zoom}" ScaleY="{Binding Zoom}" />
-                            <TranslateTransform X="{Binding OffsetX}" Y="{Binding OffsetY}" />
-                        </TransformGroup>
-                    </Canvas.RenderTransform>
 
-                    <i:Interaction.Behaviors>
-                        <local2:ZoomPanBehavior/>
-                    </i:Interaction.Behaviors>
+        <Border Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Background="Black" Margin="10 5 10 10" Style="{StaticResource Basic}" BorderThickness="0.5" BorderBrush="#21618c">
+            <Grid>
+                <Rectangle HorizontalAlignment="Stretch" VerticalAlignment="Top" Height="1.5" Fill="#5E5E5E"/>
+                <Rectangle HorizontalAlignment="Left" VerticalAlignment="Stretch" Width="1.5" Fill="#5E5E5E"/>
+                <Rectangle HorizontalAlignment="Stretch" VerticalAlignment="Bottom" Height="1" Fill="White"/>
+                <Rectangle HorizontalAlignment="Right" VerticalAlignment="Stretch" Width="1" Fill="White"/>
 
-                    <ItemsControl ItemsSource="{Binding Path=CanvasModel_.Shapes}" ItemTemplateSelector="{StaticResource ShapeSelector}">
-                        <ItemsControl.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <Canvas />
-                            </ItemsPanelTemplate>
-                        </ItemsControl.ItemsPanel>
+                <!-- Content area -->
+                <Border Background="Transparent" CornerRadius="0" BorderThickness="0.75" BorderBrush="#1b4f72">
+                    <Grid ClipToBounds="True">
+                        <Canvas x:Name="DrawingCanvas" Background="Transparent">
+                            <Canvas.RenderTransform>
+                                <TransformGroup>
+                                    <ScaleTransform ScaleX="{Binding Zoom}" ScaleY="{Binding Zoom}" />
+                                    <TranslateTransform X="{Binding OffsetX}" Y="{Binding OffsetY}" />
+                                </TransformGroup>
+                            </Canvas.RenderTransform>
 
-                        <ItemsControl.ItemContainerStyle>
-                            <Style>
-                                <Setter Property="Canvas.Left" Value="{Binding X}" />
-                                <Setter Property="Canvas.Top" Value="{Binding Y}" />
-                            </Style>
-                        </ItemsControl.ItemContainerStyle>
-                    </ItemsControl>
-                    <Rectangle Width="1000" Height="800"
-                               Fill="Transparent" Stroke="Transparent" StrokeThickness="1"
-                               Canvas.Left="-125" Canvas.Top="-250" />
-                </Canvas>
+                            <i:Interaction.Behaviors>
+                                <local2:ZoomPanBehavior/>
+                            </i:Interaction.Behaviors>
+
+                            <ItemsControl ItemsSource="{Binding Path=LowerPipeMainModel_.CanvasModel_.Shapes}" ItemTemplateSelector="{StaticResource ShapeSelector}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <Canvas />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+
+                                <ItemsControl.ItemContainerStyle>
+                                    <Style>
+                                        <Setter Property="Canvas.Left" Value="{Binding X}" />
+                                        <Setter Property="Canvas.Top" Value="{Binding Y}" />
+                                    </Style>
+                                </ItemsControl.ItemContainerStyle>
+                            </ItemsControl>
+                            <Rectangle Width="1000" Height="800"
+                                   Fill="Transparent" Stroke="Transparent" StrokeThickness="1"
+                                   Canvas.Left="-125" Canvas.Top="-250" />
+                        </Canvas>
+                    </Grid>
+                </Border>
             </Grid>
         </Border>
+      
 
-        <DockPanel Grid.Row="2" HorizontalAlignment="Right" Grid.Column="1" Margin="0 0 5 0">
+        <DockPanel Grid.Row="3" HorizontalAlignment="Right" Grid.Column="1" Margin="0 0 10 0">
             <Button x:Name="OK" Content="Ok" Style="{StaticResource bstyle1}" Margin="0 0 5 0" Command="{Binding Path=OkCommand}"/>
             <Button x:Name="APPLY" Content="Apply" Style="{StaticResource bstyle1}" Margin="0 0 5 0" Command="{Binding Path=ApplyCommand}"/>
             <Button x:Name="CANCEL" Content="Cancel" Style="{StaticResource bstyle1}" Command="{Binding Path=CancelCommand_}"/>

@@ -31,6 +31,24 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="accoremgd">
       <HintPath>..\..\..\..\engrcc\04. PROGRAMMING\07. CIVIL 3D C#\DLL References\AutoCAD 2023\accoremgd.dll</HintPath>
@@ -44,6 +62,10 @@
       <HintPath>..\..\..\..\engrcc\04. PROGRAMMING\07. CIVIL 3D C#\DLL References\AutoCAD 2023\acmgd.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="AdWindows">
+      <HintPath>..\..\..\..\engrcc\04. PROGRAMMING\07. CIVIL 3D C#\DLL References\AutoCAD 2023\AdWindows.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="AecBaseMgd">
       <HintPath>..\..\..\..\engrcc\04. PROGRAMMING\07. CIVIL 3D C#\DLL References\AutoCAD 2023\AecBaseMgd.dll</HintPath>
       <Private>False</Private>
@@ -55,6 +77,12 @@
     <Reference Include="AeccPressurePipesMgd">
       <HintPath>..\..\..\..\engrcc\04. PROGRAMMING\07. CIVIL 3D C#\DLL References\Civil3D 2023\AeccPressurePipesMgd.dll</HintPath>
       <Private>False</Private>
+    </Reference>
+    <Reference Include="DocumentFormat.OpenXml, Version=3.3.0.0, Culture=neutral, PublicKeyToken=8fb06cb64d019a17, processorArchitecture=MSIL">
+      <HintPath>..\packages\DocumentFormat.OpenXml.3.3.0\lib\net46\DocumentFormat.OpenXml.dll</HintPath>
+    </Reference>
+    <Reference Include="DocumentFormat.OpenXml.Framework, Version=3.3.0.0, Culture=neutral, PublicKeyToken=8fb06cb64d019a17, processorArchitecture=MSIL">
+      <HintPath>..\packages\DocumentFormat.OpenXml.Framework.3.3.0\lib\net46\DocumentFormat.OpenXml.Framework.dll</HintPath>
     </Reference>
     <Reference Include="ManagedMapApi">
       <HintPath>..\..\..\..\engrcc\04. PROGRAMMING\07. CIVIL 3D C#\DLL References\Map 2023\ManagedMapApi.dll</HintPath>
@@ -79,6 +107,13 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CavalryAddin\Data\ExtractCoordinatesCommandHandler.cs" />
+    <Compile Include="CavalryAddin\Data\_DataPanel.cs" />
+    <Compile Include="CavalryAddin\Elements\BlockToVertexCommandHandler.cs" />
+    <Compile Include="CavalryAddin\Elements\_ElementsPanel.cs" />
+    <Compile Include="CavalryAddin\PressurePipes\LowerPipeCommandHandler.cs" />
+    <Compile Include="CavalryAddin\PressurePipes\_PressurePipePanel.cs" />
+    <Compile Include="CavalryPlugins\ExtractCoordinates\Views\ExtractCoordinateWindowManager.cs" />
     <Compile Include="CavalryPlugins\LowerPipe\Commands\ApplyProfileCommand.cs" />
     <Compile Include="CavalryPlugins\LowerPipe\Commands\CancelCommand.cs" />
     <Compile Include="CavalryPlugins\LowerPipe\Commands\OkCommand.cs" />
@@ -86,28 +121,36 @@
     <Compile Include="CavalryPlugins\LowerPipe\Commands\RelayCommand.cs" />
     <Compile Include="CavalryPlugins\LowerPipe\Models\CanvasModel.cs" />
     <Compile Include="CavalryPlugins\LowerPipe\Models\LoweringAnalysisModel.cs" />
+    <Compile Include="CavalryPlugins\LowerPipe\Models\LowerPipeMainModel.cs" />
+    <Compile Include="CavalryPlugins\LowerPipe\Models\ObjectReferenceCollectionModel.cs" />
+    <Compile Include="CavalryPlugins\LowerPipe\Models\ObjectReferenceModel.cs" />
     <Compile Include="CavalryPlugins\LowerPipe\ViewModels\ShapeTemplateSelector.cs" />
+    <Compile Include="CavalryPlugins\LowerPipe\Views\LowerPipeWindowManager.cs" />
+    <Compile Include="CavalryPlugins\_CustomCommands\InsertBlockToVertex.cs" />
+    <Compile Include="MainApp.cs" />
     <Compile Include="Models\CADObject\PressurePipeModel.cs" />
     <Compile Include="CavalryPlugins\LowerPipe\ViewModels\LowerPipeMainViewModel.cs" />
-    <Compile Include="CavalryPlugins\LowerPipe\ViewModels\LowerPipeViewModel.cs" />
     <Compile Include="CavalryPlugins\LowerPipe\ViewModels\ShapeViewModel.cs" />
     <Compile Include="CavalryPlugins\LowerPipe\ViewModels\ZoomPanBehavior.cs" />
     <Compile Include="CavalryPlugins\LowerPipe\Views\LowerPipeMainWindow.xaml.cs">
       <DependentUpon>LowerPipeMainWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Models\UI\LoggerViewModel.cs" />
     <Compile Include="WPFSupportFunctions\Supports\ClippingBorder.cs" />
-    <Compile Include="_ACADLibrary\Annotation\CADText.cs" />
-    <Compile Include="_ACADLibrary\Elements\_Line.cs" />
-    <Compile Include="_ACADLibrary\Elements\_Polyline.cs" />
-    <Compile Include="_ACADLibrary\Geometry\Lines.cs" />
-    <Compile Include="_ACADLibrary\Selection\ACADObjectSelection.cs" />
-    <Compile Include="_ACADLibrary\AutoCADTable\CADTable.cs" />
-    <Compile Include="_ACADLibrary\_ObjectData\_ObjectDataTable.cs" />
-    <Compile Include="_C3DLibrary\Elements\_FeatureLines.cs" />
-    <Compile Include="_C3DLibrary\Elements\_Points.cs" />
-    <Compile Include="_C3DLibrary\Elements\_PressurePipe.cs" />
-    <Compile Include="_C3DLibrary\Elements\_Profile.cs" />
-    <Compile Include="_C3DLibrary\Selection\C3DObjectSelection.cs" />
+    <Compile Include="WPFSupportFunctions\Supports\EnumToBooleanConverter.cs" />
+    <Compile Include="_Library\_ACADLibrary\Annotation\CADText.cs" />
+    <Compile Include="_Library\_ACADLibrary\Elements\_Line.cs" />
+    <Compile Include="_Library\_ACADLibrary\Elements\_Polyline.cs" />
+    <Compile Include="_Library\_ACADLibrary\Geometry\Lines.cs" />
+    <Compile Include="_Library\_ACADLibrary\Selection\ACADObjectSelection.cs" />
+    <Compile Include="_Library\_ACADLibrary\AutoCADTable\CADTable.cs" />
+    <Compile Include="_Library\_ACADLibrary\_ObjectData\_ObjectDataTable.cs" />
+    <Compile Include="_Library\_C3DLibrary\Custom\PipeLowering.cs" />
+    <Compile Include="_Library\_C3DLibrary\Elements\_FeatureLines.cs" />
+    <Compile Include="_Library\_C3DLibrary\Elements\_Points.cs" />
+    <Compile Include="_Library\_C3DLibrary\Elements\_PressurePipe.cs" />
+    <Compile Include="_Library\_C3DLibrary\Elements\_Profile.cs" />
+    <Compile Include="_Library\_C3DLibrary\Selection\C3DObjectSelection.cs" />
     <Compile Include="CavalryPlugins\ExtractCoordinates\Commands\CancelCommand.cs" />
     <Compile Include="CavalryPlugins\ExtractCoordinates\Commands\CommandBase.cs" />
     <Compile Include="CavalryPlugins\ExtractCoordinates\Commands\ExtractCoordinatesOk.cs" />
@@ -120,7 +163,6 @@
     </Compile>
     <Compile Include="CavalryPlugins\ExtractCoordinates\Views\TextBoxHelper.cs" />
     <Compile Include="CavalryPlugins\LowerPipe\LowerPipeStartUp.cs" />
-    <Compile Include="Class1.cs" />
     <Compile Include="Consoles\ConsoleBasic.xaml.cs">
       <DependentUpon>ConsoleBasic.xaml</DependentUpon>
     </Compile>
@@ -136,7 +178,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WPFSupportFunctions\Supports\EmptyToZeroConverter.cs" />
     <Compile Include="WPFSupportFunctions\Supports\FocusHelper.cs" />
-    <Compile Include="_MathLibrary\_Math.cs" />
+    <Compile Include="_Library\_ExcelLibrary\_Excel.cs" />
+    <Compile Include="_Library\_MathLibrary\_Math.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -160,11 +203,40 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="BuildScript.txt" />
+    <Content Include="PackageContents.xml" />
+    <Resource Include="Resources\Vertex_16.ico" />
+    <Resource Include="Resources\Vertex_24.ico" />
+    <Resource Include="Resources\Vertex_32.ico" />
+    <Resource Include="Resources\ExtractCoordinates_16.ico" />
+    <Resource Include="Resources\ExtractCoordinates_24.ico" />
+    <Resource Include="Resources\ExtractCoordinates_32.ico" />
+    <Resource Include="Resources\LowerPipe_16.ico" />
+    <Resource Include="Resources\LowerPipe_24.ico" />
+    <Resource Include="Resources\LowerPipe_32.ico" />
     <Resource Include="Icons\CavalryLogo_16.ico" />
     <Resource Include="Icons\SelectElements_32.ico" />
     <Content Include="BugNotes.txt" />
     <Content Include="Note.txt" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="CavalryPlugins\SurfaceStyles\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>set PLUGIN_NAME=CavalryCivil3DPlugin
+set PLUGIN_DEST=%25AppData%25\Autodesk\ApplicationPlugins\%25PLUGIN_NAME%25.bundle
+
+REM Create plugin directory if it doesn't exist
+if not exist "%25PLUGIN_DEST%25\Contents" mkdir "%25PLUGIN_DEST%25\Contents"
+
+REM Copy DLL
+copy /Y "$(TargetPath)" "%25PLUGIN_DEST%25\Contents\"
+
+REM Copy Resources folder
+xcopy /Y /E /I /Q "$(ProjectDir)Resources" "%25PLUGIN_DEST%25\Contents\Resources\"
+
+REM Copy XML File
+copy /Y "$(ProjectDir)PackageContents.xml" "%25PLUGIN_DEST%25\"</PostBuildEvent>
+  </PropertyGroup>
 </Project>

@@ -31,7 +31,6 @@ namespace CavalryCivil3DPlugin.CavalryPlugins.ExtractCoordinates.Views
             mainViewModel.CloseAction = this.Close;
             mainViewModel.HideAction = this.Hide;
             this.DataContext = mainViewModel;
-            this.Show();
         }
 
         private void FilterKeySelectionChanged(object sender, SelectionChangedEventArgs e)

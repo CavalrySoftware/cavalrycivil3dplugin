@@ -20,19 +20,15 @@ namespace CavalryCivil3DPlugin.CavalryPlugins.LowerPipe.Commands
 
         public override void Execute(object parameter)
         {
-            if (!_ViewModel.InitialEdit)
+            if (_ViewModel.SelectedMethod == LowerPipeMainViewModel.NotificationMethod.ModifyPipe)
             {
                 _ViewModel._ApplyProfileCommand.Apply();
+                _ViewModel.LowerPipeMainModel_.FollowPipe();
             }
 
-            if (_ViewModel.DeleteProfile)
-            {
-                _ViewModel.DeleteProfiles();
-            }
-
-            _ViewModel.MainTransaction.Commit();
-            _ViewModel.MainDocumentLock.Dispose();
-            _ViewModel.AutocadDocument.Editor.Regen();
+            _ViewModel.LowerPipeMainModel_.MainTransaction.Commit();
+            _ViewModel.LowerPipeMainModel_.MainDocumentLock.Dispose();
+            _ViewModel.LowerPipeMainModel_.AutocadDocument.Editor.Regen();
             _ViewModel.CloseAction.Invoke();
         }
     }

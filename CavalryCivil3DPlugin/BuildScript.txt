@@ -1,0 +1,14 @@
+﻿set PLUGIN_NAME=CavalryCivil3DPlugin
+set PLUGIN_DEST=%AppData%\Autodesk\ApplicationPlugins\%PLUGIN_NAME%.bundle
+
+REM Create plugin directory if it doesn't exist
+if not exist "%PLUGIN_DEST%\Contents" mkdir "%PLUGIN_DEST%\Contents"
+
+REM Copy DLL
+copy /Y "$(TargetPath)" "%PLUGIN_DEST%\Contents\"
+
+REM Copy Resources folder
+xcopy /Y /E /I /Q "$(ProjectDir)Resources" "%PLUGIN_DEST%\Contents\Resources\"
+
+REM Copy XML File
+copy /Y "$(ProjectDir)PackageContents.xml" "%PLUGIN_DEST%\"
