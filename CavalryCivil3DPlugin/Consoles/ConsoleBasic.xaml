@@ -26,7 +26,7 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         
-        <TextBlock Name="Text" Grid.Row="0"/>
+        <TextBlock Name="Text" Grid.Row="0" TextWrapping="Wrap"/>
         <ListBox Name="Items" ItemContainerStyle="{StaticResource NoCheckbox}" Grid.Row="1"/>
     </Grid>
 </Window>

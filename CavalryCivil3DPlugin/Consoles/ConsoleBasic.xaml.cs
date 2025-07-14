@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Runtime.Remoting.Messaging;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -14,6 +15,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using DocumentFormat.OpenXml.Spreadsheet;
 
 
 namespace CavalryCivil3DPlugin.Consoles
@@ -23,6 +25,7 @@ namespace CavalryCivil3DPlugin.Consoles
     /// </summary>
     public partial class ConsoleBasic : Window
     {
+       
         public ConsoleBasic(IEnumerable collection)
         {
             InitializeComponent();
@@ -51,6 +54,12 @@ namespace CavalryCivil3DPlugin.Consoles
             Items.ItemsSource = collection;
             this.Show();
         }
+
+        public void UpdateText(string text_)
+        {
+            Text.Text = text_;
+        }
+
     }
 
 
@@ -87,7 +96,34 @@ namespace CavalryCivil3DPlugin.Consoles
             string message = $"I am here!";
             ConsoleBasic consoleBasic = new ConsoleBasic(message);
         }
+    }
 
+    public class StaticConsole : Window
+    {
+        private string message = "";
+        private ConsoleBasic consoleBasic;
+
+        public StaticConsole ()
+        {
+            message = "";
+            consoleBasic = new ConsoleBasic(message);
+        }
+
+        public void Print(string _message)
+        {
+            message = message + "\n" + _message;
+            consoleBasic.UpdateText(message);
+        }
+
+        public void Print(IEnumerable collection)
+        {
+            foreach (var item in collection)
+            {
+                message = message + "\n" + item;
+            }
+            
+            consoleBasic.UpdateText(message);
+        }
     }
 
 }
