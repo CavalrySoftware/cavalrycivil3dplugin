@@ -14,7 +14,6 @@ namespace CavalryCivil3DPlugin.CavalryPlugins._CustomCommands
         [CommandMethod("ACCTest")]
         public async Task _ACCTest()
         {
-
             string clientId = "lGFFOxhKPtGneOmAsfnX6smn6iLAEUoUj8cVtVHVjIiADIGA";
             string clientSecret = "cQnZNwaZ29FEpYtqMgasiNwHxYTomZ0z3m103zyGGRbP1N90Faaox5nozNM8HgGe";
             string accountId = "4fbfcc3d-d3ab-48d6-a25c-82f0e7d9b84b";

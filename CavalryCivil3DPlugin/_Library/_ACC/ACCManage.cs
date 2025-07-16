@@ -74,7 +74,7 @@ namespace CavalryCivil3DPlugin._Library._ACC
             {
                 {"client_id", _ClientId},
                 {"client_secret", _ClientSecret},
-                {"grant_type", "authorization_code"},
+                {"grant_type", "client_credentials"},
                 {"scope", "data:read data:write account:read"}
             };
             //hD
