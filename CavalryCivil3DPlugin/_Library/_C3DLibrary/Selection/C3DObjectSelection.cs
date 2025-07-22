@@ -10,6 +10,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.Civil.ApplicationServices;
 using Autodesk.Civil.DatabaseServices;
+using CavalryCivil3DPlugin.Consoles;
 using CadObjectId = Autodesk.AutoCAD.DatabaseServices.ObjectId;
 
 namespace CavalryCivil3DPlugin.C3DLibrary.Selection
@@ -18,7 +19,11 @@ namespace CavalryCivil3DPlugin.C3DLibrary.Selection
     {
 
         private static TypedValue _FeatureLinesType = new TypedValue((int)DxfCode.Start, "AECC_FEATURE_LINE");
+        private static TypedValue _AlignmentType = new TypedValue((int)DxfCode.Start, "AECC_ALIGNMENT");
         private static TypedValue _ProfileViewType = new TypedValue((int)DxfCode.Start, "AECC_PROFILE_VIEW");
+        private static TypedValue _FittingType = new TypedValue((int)DxfCode.Start, "AECC_FITTING");
+        private static TypedValue _AppurtenanceType = new TypedValue((int)DxfCode.Start, "AECC_APPURTENANCE");
+
         private static SelectionFilter _FeatureLinesFilter = new SelectionFilter(new TypedValue[] { _FeatureLinesType });
         private static SelectionFilter _ProfileViewFilter = new SelectionFilter(new TypedValue[] { _ProfileViewType });
 
@@ -196,5 +201,75 @@ namespace CavalryCivil3DPlugin.C3DLibrary.Selection
             return ObjectId.Null;
         }
 
+
+        public static List<ObjectId> GetAlignmentIdsByLayer(Document _autocadDocument, CivilDocument _civilDocument, List<string> _layers)
+        {
+            List<ObjectId> allAlignmentIds = new List<ObjectId>();
+
+            List<TypedValue> typedValues = new List<TypedValue>()
+            {
+                new TypedValue((int)DxfCode.Operator, "<AND"),
+                _AlignmentType,
+                new TypedValue((int)DxfCode.Operator, "<OR")
+            };
+
+            foreach (string layerName in _layers)
+            {
+                TypedValue layerType = new TypedValue((int)DxfCode.LayerName, layerName);
+                typedValues.Add(layerType);
+            }
+            typedValues.Add(new TypedValue((int)DxfCode.Operator, "OR>"));
+            typedValues.Add(new TypedValue((int)DxfCode.Operator, "AND>"));
+
+
+
+            SelectionFilter alignmentFilter = new SelectionFilter(typedValues.ToArray());
+            PromptSelectionResult allAlignmentResult = _autocadDocument.Editor.SelectAll(alignmentFilter);
+
+            if (allAlignmentResult.Status == PromptStatus.OK)
+            {
+                SelectionSet alignmentSelectionSet = allAlignmentResult.Value;
+                allAlignmentIds = alignmentSelectionSet.GetObjectIds().ToList();
+            }
+
+            return allAlignmentIds;
+        }
+
+
+        public static List<ObjectId> GetFittingsAndAppurtenancesByLayer(Document _autocadDocument, CivilDocument _civilDocument, List<string> _layers)
+        {
+            List<ObjectId> objectIds = new List<ObjectId>();
+
+
+            List<TypedValue> typedValues = new List<TypedValue>()
+            {
+                new TypedValue((int)DxfCode.Operator, "<AND"),
+                new TypedValue((int)DxfCode.Operator, "<OR"),
+                _FittingType,
+                _AppurtenanceType,
+                new TypedValue((int)DxfCode.Operator, "OR>"),
+                new TypedValue((int)DxfCode.Operator, "<OR"),
+            };
+
+
+            foreach (string layerName in _layers)
+            {
+                TypedValue layerType = new TypedValue((int)DxfCode.LayerName, layerName);
+                typedValues.Add(layerType);
+            }
+            typedValues.Add(new TypedValue((int)DxfCode.Operator, "OR>"));
+            typedValues.Add(new TypedValue((int)DxfCode.Operator, "AND>"));
+
+            SelectionFilter componentsFilter = new SelectionFilter(typedValues.ToArray());
+            PromptSelectionResult componentsResult = _autocadDocument.Editor.SelectAll(componentsFilter);
+
+            if (componentsResult.Status == PromptStatus.OK)
+            {
+                SelectionSet componentsSelectionSet = componentsResult.Value;
+                objectIds = componentsSelectionSet.GetObjectIds().ToList();
+            }
+
+            return objectIds;
+        }
     }
 }

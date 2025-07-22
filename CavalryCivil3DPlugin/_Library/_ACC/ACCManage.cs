@@ -60,14 +60,14 @@ namespace CavalryCivil3DPlugin._Library._ACC
 
         public async Task Initialize()
         {
-            //_Console.ShowConsole("Retrieving Token...");
+            Console.Print("Initializing...");
             Console.Print("Retrieving Token...");
-            var accessToken = await GetAccessToken();
+            var accessToken = await Get2LeggedAccessToken();
             Console.Print("Token Successfully Retrieved");
         }
 
 
-        private async Task<string> GetAccessToken()
+        private async Task<string> Get2LeggedAccessToken()
         {
             //{"scope", "data:read data:write account:read"}
             var formParams = new Dictionary<string, string>
@@ -95,6 +95,39 @@ namespace CavalryCivil3DPlugin._Library._ACC
 
             return null; 
         }
+
+
+        private async Task<string> Get3LeggedAccessToken()
+        {
+            //{"scope", "data:read data:write account:read"}
+            var formParams = new Dictionary<string, string>
+            {
+                {"client_id", _ClientId},
+                {"client_secret", _ClientSecret},
+                {"grant_type", "client_credentials"},
+                {"scope", "data:read data:write account:read"}
+            };
+            //hD
+
+            var formContent = new FormUrlEncodedContent(formParams);
+            var response = await _HttpClient.PostAsync("https://developer.api.autodesk.com/authentication/v2/token", formContent);
+
+            response.EnsureSuccessStatusCode();
+            var responseContent = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                var doc = Newtonsoft.Json.Linq.JObject.Parse(responseContent);
+                string accessToken = (string)doc["access_token"];
+                _AccessToken = accessToken;
+                return accessToken;
+            }
+
+            return null;
+        }
+
+
+
 
 
 

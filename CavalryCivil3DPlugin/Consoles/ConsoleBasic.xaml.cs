@@ -15,6 +15,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Autodesk.Gis.Map;
 using DocumentFormat.OpenXml.Spreadsheet;
 
 
@@ -96,6 +97,18 @@ namespace CavalryCivil3DPlugin.Consoles
             string message = $"I am here!";
             ConsoleBasic consoleBasic = new ConsoleBasic(message);
         }
+
+        public static void ShowConsole(Dictionary<string, string> dictionary)
+        {
+            string message = "";
+
+            foreach(var key in dictionary.Keys)
+            {
+                string newMessage = $"{key} : {dictionary[key]}";
+                message = message + "\n" + newMessage;
+            }
+            ConsoleBasic consoleBasic = new ConsoleBasic(message);
+        }
     }
 
     public class StaticConsole : Window
@@ -115,6 +128,12 @@ namespace CavalryCivil3DPlugin.Consoles
             consoleBasic.UpdateText(message);
         }
 
+        public void Print(int _message)
+        {
+            message = message + "\n" + _message.ToString();
+            consoleBasic.UpdateText(message);
+        }
+
         public void Print(IEnumerable collection)
         {
             foreach (var item in collection)
@@ -124,6 +143,8 @@ namespace CavalryCivil3DPlugin.Consoles
             
             consoleBasic.UpdateText(message);
         }
+
+
     }
 
 }

@@ -1044,4 +1044,40 @@
     </Style>
     <!--#endregion-->
 
+    
+    
+    <!--#region ListView Style-->
+    <Style x:Key="ListViewStyle" TargetType="ListViewItem">
+        <Setter Property="Background" Value="White"/>
+        <Setter Property="Foreground" Value="Black"/>
+        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="Padding" Value="4"/>
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+        <Style.Triggers>
+            <!-- Alternating row color -->
+            <Trigger Property="ItemsControl.AlternationIndex" Value="1">
+                <Setter Property="Background" Value="#f2f4f4"/>
+            </Trigger>
+
+            <!-- Selected item color -->
+            <Trigger Property="IsSelected" Value="True">
+                <Setter Property="Background" Value="{StaticResource Blue2}"/>
+                <!-- Custom selected color -->
+                <Setter Property="Foreground" Value="Black"/>
+            </Trigger>
+
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{StaticResource Blue3}"/>
+            </Trigger>
+
+
+
+        </Style.Triggers>
+    </Style>
+    <!--#endregion-->
+
+
+
 </ResourceDictionary>
