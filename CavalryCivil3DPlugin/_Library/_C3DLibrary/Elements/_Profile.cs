@@ -53,7 +53,6 @@ namespace CavalryCivil3DPlugin._C3DLibrary.Elements
 
                 Profile newProfile = tr.GetObject(newProfileId, OpenMode.ForWrite) as Profile;
 
-
                 ProfilePVICollection pVIs = newProfile.PVIs;
 
                 int index = 0;
@@ -64,13 +63,19 @@ namespace CavalryCivil3DPlugin._C3DLibrary.Elements
                 }
 
                 tr.Commit();
-
                 return newProfileId;
             }
         }
 
 
-        public static ObjectId ReCreateProfile(Document _autocadDocument, CivilDocument _civilDocument, ObjectId _referenceAlignmentId, ObjectId _referenceProfileId, List<(double, double)> _stationElevation)
+        public static ObjectId ReCreateProfile(
+            Document _autocadDocument, 
+            CivilDocument _civilDocument, 
+            ObjectId _referenceAlignmentId, 
+            ObjectId _referenceProfileId,
+            List<(double, double)> _stationElevation,
+            bool _startOnly = false,
+            bool _endOnly = false)
         {
 
             using (Transaction tr = _autocadDocument.Database.TransactionManager.StartTransaction())
@@ -106,30 +111,64 @@ namespace CavalryCivil3DPlugin._C3DLibrary.Elements
 
                 ProfilePVICollection mainProfilePVIs = mainProfile.PVIs;
                 ProfilePVICollection newProfilePVIs = newProfile.PVIs;
-
-                foreach (ProfilePVI pvi in mainProfilePVIs)
-                {
-                    newProfilePVIs.AddPVI(pvi.Station, pvi.Elevation);
-                }
-
                 double startStation = _stationElevation.First().Item1;
                 double endStation = _stationElevation.Last().Item1;
 
-
-                foreach (ProfilePVI pvi in newProfilePVIs)
+                foreach (ProfilePVI pvi in mainProfilePVIs)
                 {
-                    if (pvi.Station > startStation && pvi.Station < endStation) newProfilePVIs.Remove(pvi);
-                    if (pvi.Station > endStation) break;
+                    if (pvi.Station > startStation && pvi.Station < endStation)
+                    {
+                        continue;
+                    }
+
+                    newProfilePVIs.AddPVI(pvi.Station, pvi.Elevation);
+                }
+
+
+                int index = 0;
+
+                if (_startOnly)
+                {
+                    foreach (var points in _stationElevation)
+                    {
+                        if (index == 0)
+                        {
+                            newProfilePVIs[0].Station = points.Item1;
+                            newProfilePVIs[0].Elevation = points.Item2;
+                            index++;
+                            continue;
+                        }
+
+                        newProfilePVIs.AddPVI(points.Item1, points.Item2);
+                    }
+                }
+
+
+                else if (_endOnly)
+                {
+                    foreach (var points in _stationElevation)
+                    {
+                        if (points == _stationElevation.Last())
+                        {
+                            newProfilePVIs.Last().Station = points.Item1;
+                            newProfilePVIs.Last().Elevation = points.Item2;
+                            break;
+                        }
+
+                        newProfilePVIs.AddPVI(points.Item1, points.Item2);
+                    }
+                }
+
+
+                else
+                {
+                    foreach (var points in _stationElevation)
+                    {
+                        newProfilePVIs.AddPVI(points.Item1, points.Item2);
+                    }
                 }
                 
-
-                foreach (var points in _stationElevation)
-                {
-                    newProfilePVIs.AddPVI(points.Item1, points.Item2);
-                }
-
                 tr.Commit();
-
                 return newProfileId;
             }
         }

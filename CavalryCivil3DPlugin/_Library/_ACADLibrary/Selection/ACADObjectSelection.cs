@@ -8,6 +8,7 @@ using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
+using Autodesk.Civil.ApplicationServices;
 using CavalryCivil3DPlugin.ACADLibrary._ObjectData;
 using CavalryCivil3DPlugin.Consoles;
 
@@ -167,6 +168,25 @@ namespace CavalryCivil3DPlugin.ACADLibrary.Selection
         }
 
 
+        public static ObjectId PickPolyline(Document _autocadDocument)
+        {
+            PromptEntityOptions promptOptions = new PromptEntityOptions("\nSelect a Polyline");
+            promptOptions.SetRejectMessage("\nOnly polylines are allowed.");
+            promptOptions.AddAllowedClass(typeof(Polyline), exactMatch: false);
+
+            promptOptions.AddAllowedClass(typeof(Polyline), exactMatch: false);
+
+            PromptEntityResult entityResult = _autocadDocument.Editor.GetEntity(promptOptions);
+
+            if (entityResult.Status == PromptStatus.OK)
+            {
+                return entityResult.ObjectId;
+            }
+
+            return ObjectId.Null;
+        }
+
+
         public static List<string> GetAllLayerNames(Document _autocadDocument)
         {
             List<string> layerNames = new List<string>();
@@ -186,9 +206,10 @@ namespace CavalryCivil3DPlugin.ACADLibrary.Selection
             return layerNames;
         }
 
-        private static ObjectId PickElement(Document _autocadDocument, Type _elementType, string elementName)
+        private static ObjectId PickElement(Document _autocadDocument, Type _elementType, string elementName, string _selectMessage=null)
         {
-            string selectMessage = ($"\nSelect {elementName}");
+            string selectMessage = _selectMessage == null ? ($"\nSelect {elementName}") : _selectMessage;
+
             string rejectMessage = ($"\nSelect only {elementName}");
 
             PromptSelectionOptions promptOptions = new PromptSelectionOptions();
@@ -205,6 +226,12 @@ namespace CavalryCivil3DPlugin.ACADLibrary.Selection
             }
 
             return ObjectId.Null;
+        }
+
+
+        public static ObjectId PickMLeader(Document _autocadDocument, string _selectMessage = null)
+        {
+            return PickElement(_autocadDocument, typeof(MLeader), "MLeader", _selectMessage);
         }
 
 
@@ -256,6 +283,67 @@ namespace CavalryCivil3DPlugin.ACADLibrary.Selection
             }
 
             return ObjectId.Null;
+        }
+
+        public static (Point3d _insertionPoint, bool _valid) PickInsertionPoint(Document _autocadDocument)
+        {
+            PromptPointOptions prompt = new PromptPointOptions("\nPick Insertion Point:");
+            PromptPointResult promptResult = _autocadDocument.Editor.GetPoint(prompt);
+
+            Point3d insertPoint;
+            bool valid = false;
+
+            if (promptResult.Status == PromptStatus.OK)
+            {
+                insertPoint = promptResult.Value;
+                valid = true;
+            }
+            else
+            {
+                insertPoint = new Point3d(0, 0, 0);
+            }
+
+            return (insertPoint, valid);
+        }
+
+        public static List<ObjectId> PickPolylinesByLayer(Document _autocadDocument, List<string> _layers)
+        {
+            List<ObjectId> polylineIds = new List<ObjectId>();
+
+            List<TypedValue> typedValues = new List<TypedValue>()
+            {
+                new TypedValue((int)DxfCode.Operator, "<AND"),
+                _polyLineType,
+                new TypedValue((int)DxfCode.Operator, "<OR")
+            };
+
+            foreach (string layerName in _layers)
+            {
+                TypedValue layerType = new TypedValue((int)DxfCode.LayerName, layerName);
+                typedValues.Add(layerType);
+            }
+            typedValues.Add(new TypedValue((int)DxfCode.Operator, "OR>"));
+            typedValues.Add(new TypedValue((int)DxfCode.Operator, "AND>"));
+
+            PromptSelectionOptions selectionOptions = new PromptSelectionOptions()
+            {
+                MessageForAdding = "\nSelect Polylines: ",
+                MessageForRemoval = "\nRemove Polylines: ",
+                AllowDuplicates = false,
+                RejectObjectsOnLockedLayers = true
+            };
+
+            SelectionFilter polylineFilter = new SelectionFilter(typedValues.ToArray());
+
+            PromptSelectionResult polylineResult = _autocadDocument.Editor.GetSelection(selectionOptions, polylineFilter);
+
+            if (polylineResult.Status == PromptStatus.OK)
+            {
+                SelectionSet alignmentSelectionSet = polylineResult.Value;
+                polylineIds = alignmentSelectionSet.GetObjectIds().ToList();
+            }
+
+            return polylineIds;
         }
 
     }

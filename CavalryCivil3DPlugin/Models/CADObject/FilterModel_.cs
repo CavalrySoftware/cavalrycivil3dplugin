@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace CavalryCivil3DPlugin.Models.CADObject
 {
-    public class FilterModel
+    public class FilterModel_
     {
 
         #region << PROPERTIES >>
@@ -33,7 +33,7 @@ namespace CavalryCivil3DPlugin.Models.CADObject
 
 
 		#region << CONSTRUCTOR >>
-		public FilterModel(dynamic filterObject)
+		public FilterModel_(dynamic filterObject)
 		{
 			_FilterObject = filterObject;
             _FilterName = filterObject.Name;

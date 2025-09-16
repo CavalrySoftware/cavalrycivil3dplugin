@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media.Imaging;
+using Autodesk.AutoCAD.Internal.Render.RapidRT;
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.Civil.ApplicationServices;
 using Autodesk.Windows;
@@ -17,6 +18,9 @@ namespace CavalryCivil3DPlugin
 {
     public class MainApp : IExtensionApplication
     {
+
+        private bool _Initialized = false;
+
         public void Initialize()
         {
             ComponentManager.ItemInitialized += ComponentManagerInitialized;
@@ -31,7 +35,11 @@ namespace CavalryCivil3DPlugin
 
         public void ComponentManagerInitialized(object sender, EventArgs e)
         {
+            if (_Initialized) return;
+
+            _Initialized = true;
             ComponentManager.ItemInitialized -= ComponentManagerInitialized;
+
             try
             {
                 InitializeTab();
@@ -41,15 +49,16 @@ namespace CavalryCivil3DPlugin
             {
                 _Console.ShowConsole(ex.ToString());
             }
-            
         }
 
 
         public void InitializeTab ()
         {
-            string AssemblyPath = System.Reflection.Assembly.GetExecutingAssembly().Location;
-
             RibbonControl ribbonControl = ComponentManager.Ribbon;
+
+            if (ribbonControl.Tabs.Any(tab => tab.Id == "{3D97F344-DA15-485B-8201-41A7A81DAE5A}")) return;
+
+            string AssemblyPath = System.Reflection.Assembly.GetExecutingAssembly().Location;
 
             RibbonTab ribbonTab = new RibbonTab
             {

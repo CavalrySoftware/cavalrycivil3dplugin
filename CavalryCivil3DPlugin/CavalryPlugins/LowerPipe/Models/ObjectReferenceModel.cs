@@ -64,6 +64,9 @@ namespace CavalryCivil3DPlugin.CavalryPlugins.LowerPipe.Models
 			_PressurePipeReference = new PressurePipeModel(_autocadDocument);
 		}
 
+		private bool _EndOfPipe = false;
+		public bool EndofPipe => _EndOfPipe;
+
 
 		public void SetObject()
 		{
@@ -80,6 +83,11 @@ namespace CavalryCivil3DPlugin.CavalryPlugins.LowerPipe.Models
 				case "Line":
 					SetLineReference();
 					break ;
+
+				case "End of Pipe Run":
+					SetPressurePipeReference();
+                    _EndOfPipe = true;
+					break;
 			}
 		}
 
@@ -98,8 +106,10 @@ namespace CavalryCivil3DPlugin.CavalryPlugins.LowerPipe.Models
 
 		private void SetPressurePipeReference()
 		{
-            _ObjectId = C3DObjectSelection.PickPressurePipe(_AutocadDocument, "reference Pressure Pipe");
+            _ObjectId = C3DObjectSelection.PickPressurePipe(_AutocadDocument, "Reference Pressure Pipe");
 			_PressurePipeReference.SetPipe(_ObjectId);
         }
+
+
 	}
 }

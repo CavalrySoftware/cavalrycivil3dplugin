@@ -44,8 +44,9 @@ namespace CavalryCivil3DPlugin.ACADLibrary.Annotation
                 }
             }
 
-            catch (Exception ex) { ConsoleBasic console = new ConsoleBasic(ex.ToString()); }
-            
+            catch (Exception ex) { ConsoleBasic console = new ConsoleBasic(ex.ToString()); } 
         }
+
+
     }
 }

@@ -29,6 +29,7 @@ namespace CavalryCivil3DPlugin.CavalryPlugins.LowerPipe.Models
             "Pressure Pipe",
             "Line",
             "Polyline",
+            "End of Pipe Run",
         };
 
 

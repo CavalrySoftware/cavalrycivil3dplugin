@@ -22,8 +22,17 @@ namespace CavalryCivil3DPlugin._C3DLibrary.Custom
         Document _AutocadDocument;
         CivilDocument _CivilDocument;
 
-        private List<(double, double)>  _ProfileData;
-        public List<(double, double)> ProfileData => _ProfileData;
+        private List<(double, double)>  _ProfileDataContainer;
+        public List<(double, double)> ProfileDataContainer => _ProfileDataContainer;
+
+        private List<(double, double)> _ProfileDataMain;
+
+        public List<(double, double)> ProfileDataMain
+        {
+            get { return _ProfileDataMain; }
+            set { _ProfileDataMain = value; }
+        }
+
 
         private List<double> _ActualDeflections;
         public List<double> ActualDeflections => _ActualDeflections;
@@ -35,6 +44,7 @@ namespace CavalryCivil3DPlugin._C3DLibrary.Custom
 
         private ObjectId _ReferenceAlignmentId = ObjectId.Null;
         private ObjectId _ReferenceProfileId = ObjectId.Null;   
+        private ObjectId _ReferenceGroundProfileId = ObjectId.Null;
         
         private bool _ValidCalculation;
         public bool ValidCalculation => _ValidCalculation;
@@ -65,6 +75,14 @@ namespace CavalryCivil3DPlugin._C3DLibrary.Custom
         private bool _ProfileCreated = false;
         public bool ProfileCreated => _ProfileCreated;
 
+        private bool _StartOnly;
+        public bool StartOnly => _StartOnly;
+
+        private bool _EndOnly;
+        public bool EndOnly => _EndOnly;
+
+
+
 
 
         public PipeLowering(Document _autocadDocument, CivilDocument _civil3DDocument, LoggerViewModel _logger = null)
@@ -85,11 +103,20 @@ namespace CavalryCivil3DPlugin._C3DLibrary.Custom
             double _groundElevation,
             double _stationOrigin,
             ObjectId _referenceAlignmentId,
-            ObjectId _referenceProfileId)
+            ObjectId _referenceProfileId,
+            ObjectId _groundProfileId,
+            bool _startOnly = false,
+            bool _endOnly = false)
         {
 
             try
             {
+                _ReferenceAlignmentId = _referenceAlignmentId;
+                _ReferenceProfileId = _referenceProfileId;
+                _ReferenceGroundProfileId = _groundProfileId;
+
+                _StartOnly = _startOnly;
+                _EndOnly = _endOnly;
                 GenerateProfileData(_referenceCover,
                              _referenceDepth,
                              _verticalClearance,
@@ -99,9 +126,6 @@ namespace CavalryCivil3DPlugin._C3DLibrary.Custom
                              _groundElevation,
                              _stationOrigin,
                              _referenceProfileId);
-
-                _ReferenceAlignmentId = _referenceAlignmentId;
-                _ReferenceProfileId = _referenceProfileId;
             }
 
             catch (Exception ex)
@@ -114,7 +138,6 @@ namespace CavalryCivil3DPlugin._C3DLibrary.Custom
 
         public void CreateProfile(bool rangeOnly = false)
         {
-
             if (_ReferenceAlignmentId != ObjectId.Null && _ReferenceProfileId != ObjectId.Null)
             {
                 if (_ProfileCreated && _NewProfileId != ObjectId.Null)
@@ -136,7 +159,7 @@ namespace CavalryCivil3DPlugin._C3DLibrary.Custom
                                                             _CivilDocument,
                                                             _ReferenceAlignmentId,
                                                             _ReferenceProfileId,
-                                                            _ProfileData
+                                                            _ProfileDataMain
                                                             );
                     _AutocadDocument.Editor.Regen();
                 }
@@ -149,12 +172,13 @@ namespace CavalryCivil3DPlugin._C3DLibrary.Custom
                                                             _CivilDocument,
                                                             _ReferenceAlignmentId,
                                                             _ReferenceProfileId,
-                                                            _ProfileData
+                                                            _ProfileDataMain,
+                                                            _startOnly: _StartOnly,
+                                                            _endOnly: _EndOnly
                                                             );
                     _AutocadDocument.Editor.Regen();
                 }
                 
-
                 using(Transaction tr = _AutocadDocument.Database.TransactionManager.StartTransaction())
                 {
                     Profile newProfile = tr.GetObject(_NewProfileId, OpenMode.ForRead) as Profile;
@@ -189,66 +213,159 @@ namespace CavalryCivil3DPlugin._C3DLibrary.Custom
             double bottomElevation = _groundElevation - _referenceCover - _referenceDepth - _verticalClearance;
             double mainStation1 = _stationOrigin - _crossLengthStart;
             double mainStation2 = _stationOrigin + _crossLengthEnd;
+            double totalVerticalDepth = _RefCover + _RefDepth + _verticalClearance;
             
             using (Transaction tr = _AutocadDocument.Database.TransactionManager.StartTransaction())
             {
 
                 // General Constant Parameters
                 Profile mainPipe = tr.GetObject(_referenceProfileId, OpenMode.ForRead) as Profile;
+                Profile groundProfile = tr.GetObject(_ReferenceGroundProfileId, OpenMode.ForRead) as Profile;
+
                 double initialPipeElevation = mainPipe.ElevationAt(_stationOrigin);
                 double initialY = _referenceCover + _referenceDepth + _verticalClearance - (_groundElevation - initialPipeElevation);
                 _ValidCalculation = true;
 
-                // General Objectic Variable Containers
+
+                // General Object Variable Containers
+                (double, double) p0 = (_stationOrigin, bottomElevation);
                 (double, double) p1;
                 (double, double) p2;
-                (double, double) p3 = (mainStation1, bottomElevation);
-                (double, double) p4 = (mainStation2, bottomElevation);
                 (double, double) p5;
                 (double, double) p6;
 
-                (p2, p1) = GetTappingPoints
-                    (
-                    _referenceProfileId: _referenceProfileId,
-                    _initialY: initialY,
-                    _maxDeflection: _maxDeflection,
-                    _referenceStation: mainStation1,
-                    _bottomElevation: bottomElevation,
-                    _start : true
-                    );
-
-                (p5, p6) = GetTappingPoints
-                    (
-                    _referenceProfileId: _referenceProfileId,
-                    _initialY: initialY,
-                    _maxDeflection: _maxDeflection,
-                    _referenceStation: mainStation2,
-                    _bottomElevation: bottomElevation,
-                    _start: false
-                    );
-
-                if (_ValidCalculation)
+                // For typical crossing. Crossing on range of pipe length.
+                if (!_StartOnly && !_EndOnly)
                 {
-                    _ProfileData = new List<(double, double)>();
+                    double bottomElevation1 = groundProfile.ElevationAt(mainStation1) - totalVerticalDepth;
+                    double bottomElevation2 = groundProfile.ElevationAt(mainStation2) - totalVerticalDepth;
+                    (double, double) p3 = (mainStation1, bottomElevation1);
+                    (double, double) p4 = (mainStation2, bottomElevation2);
 
-                    _ProfileData.Add(p1);
-                    _ProfileData.Add(p2);
-                    _ProfileData.Add(p3);
-                    _ProfileData.Add(p4);
-                    _ProfileData.Add(p5);
-                    _ProfileData.Add(p6);
+                    (p2, p1) = GetTappingPoints
+                                                (
+                                                _referenceProfileId: _referenceProfileId,
+                                                _initialY: initialY,
+                                                _maxDeflection: _maxDeflection,
+                                                _referenceStation: mainStation1,
+                                                _bottomElevation: bottomElevation1,
+                                                _start: true
+                                                );
 
-                    SetActualDeflections();
-                    _Initialized = true;
+                    (p5, p6) = GetTappingPoints
+                                                (
+                                                _referenceProfileId: _referenceProfileId,
+                                                _initialY: initialY,
+                                                _maxDeflection: _maxDeflection,
+                                                _referenceStation: mainStation2,
+                                                _bottomElevation: bottomElevation2,
+                                                _start: false
+                                                );
+
+                    if (_ValidCalculation)
+                    {
+                        _ProfileDataContainer = new List<(double, double)>();
+                        _ProfileDataMain = new List<(double, double)>();
+
+
+                        _ProfileDataContainer.Add(p1);
+                        _ProfileDataContainer.Add(p2);
+                        _ProfileDataContainer.Add(p3);
+                        _ProfileDataContainer.Add(p4);
+                        _ProfileDataContainer.Add(p5);
+                        _ProfileDataContainer.Add(p6);
+
+                        _ProfileDataMain = _ProfileDataContainer;
+
+                        SetActualDeflections();
+                        _Initialized = true;
+                    }
+                }
+
+                // For one end only.
+                else
+                {
+                    if (_EndOnly)
+                    {
+                        double bottomElevation1 = groundProfile.ElevationAt(mainStation1) - totalVerticalDepth;
+                        (double, double) p3 = (mainStation1, bottomElevation1);
+
+                        (p2, p1) = GetTappingPoints
+                                                    (
+                                                    _referenceProfileId: _referenceProfileId,
+                                                    _initialY: initialY,
+                                                    _maxDeflection: _maxDeflection,
+                                                    _referenceStation: mainStation1,
+                                                    _bottomElevation: bottomElevation1,
+                                                    _start: true
+                                                    );
+
+                        if (_ValidCalculation)
+                        {
+                            _ProfileDataContainer = new List<(double, double)>();
+                            _ProfileDataMain = new List<(double, double)>();
+
+                            _ProfileDataContainer.Add(p1);
+                            _ProfileDataContainer.Add(p2);
+                            _ProfileDataContainer.Add(p3);
+                            _ProfileDataContainer.Add(p0);
+                            _ProfileDataContainer.Add((_stationOrigin + 1, bottomElevation));
+                            _ProfileDataContainer.Add((_stationOrigin + 2, bottomElevation));
+
+                            _ProfileDataMain.Add(p1);
+                            _ProfileDataMain.Add(p2);
+                            _ProfileDataMain.Add(p3);
+                            _ProfileDataMain.Add(p0);
+
+                            SetActualDeflections();
+                            _Initialized = true; 
+                        }
+                    }
+
+
+                   else if (_StartOnly)
+                    {
+                        double bottomElevation2 = groundProfile.ElevationAt(mainStation2) - totalVerticalDepth;
+                        (double, double) p4 = (mainStation2, bottomElevation2);
+                        (p5, p6) = GetTappingPoints
+                                               (
+                                               _referenceProfileId: _referenceProfileId,
+                                               _initialY: initialY,
+                                               _maxDeflection: _maxDeflection,
+                                               _referenceStation: mainStation2,
+                                               _bottomElevation: bottomElevation2,
+                                               _start: false
+                                               );
+
+                        if (_ValidCalculation)
+                        {
+                            _ProfileDataContainer = new List<(double, double)>();
+                            _ProfileDataMain = new List<(double, double)>();
+
+                            _ProfileDataContainer.Add((_stationOrigin - 2, bottomElevation));
+                            _ProfileDataContainer.Add((_stationOrigin - 1, bottomElevation));
+                            _ProfileDataContainer.Add(p0);
+                            _ProfileDataContainer.Add(p4);
+                            _ProfileDataContainer.Add(p5);
+                            _ProfileDataContainer.Add(p6);
+
+                            _ProfileDataMain.Add(p0);
+                            _ProfileDataMain.Add(p4);
+                            _ProfileDataMain.Add(p5);
+                            _ProfileDataMain.Add(p6);
+
+
+                            SetActualDeflections();
+                            _Initialized = true;
+                        }
+                    }
                 }
             }
         }
 
 
-
         private ((double, double), (double, double)) GetTappingPoints(ObjectId _referenceProfileId, double _initialY, double _maxDeflection, double _referenceStation, double _bottomElevation, bool _start)
         {
-
             if (!_ValidCalculation) return ((0, 0), (0, 0));
 
             int factor = _start ? -1 : 1;
@@ -348,7 +465,7 @@ namespace CavalryCivil3DPlugin._C3DLibrary.Custom
                 {
                     
                     double tappingAngle = _Math.ArcTangent((currentSegment.Item1.Item2 - currentSegment.Item2.Item2) / (currentSegment.Item1.Item1 - currentSegment.Item2.Item1));
-                    
+                    //_Console.ShowConsole(tappingAngle.ToString());
                     if (Math.Abs(tappingAngle) > _MaxDeflection)
                     {
                         _ValidCalculation = false;
@@ -358,7 +475,6 @@ namespace CavalryCivil3DPlugin._C3DLibrary.Custom
 
                     else
                     {
-                        
                         if (_start && tappingAngle > 0 && (_maxDeflection + tappingAngle) > _MaxDeflection)
                         {
                             _maxDeflection = _maxDeflection - tappingAngle;
@@ -370,7 +486,7 @@ namespace CavalryCivil3DPlugin._C3DLibrary.Custom
                             _maxDeflection = _maxDeflection - Math.Abs(tappingAngle);
                             return GetTappingPoints(_referenceProfileId, _initialY, _maxDeflection, _referenceStation, _bottomElevation, _start);
                         }
-                    
+
                         p1 = (intersectionPoint.X, intersectionPoint.Y);
                         double st = intersectionPoint.X + tapExtension;
                         double el = mainPipe.ElevationAt(st);
@@ -380,20 +496,38 @@ namespace CavalryCivil3DPlugin._C3DLibrary.Custom
                         return (p1, p2);
                     }
                 }
-                
-                
+
                 return ((0, 0), (0, 0));
             }
         }
 
 
-
         private void SetActualDeflections()
         {
-            double d2 = _Math.ArcTangent((_ProfileData[1].Item2 - _ProfileData[2].Item2) / (_ProfileData[2].Item1 - _ProfileData[1].Item1));
-            double d3 = _Math.ArcTangent((_ProfileData[4].Item2 - _ProfileData[3].Item2) / (_ProfileData[4].Item1 - _ProfileData[3].Item1));
-            double d1 = _Math.ArcTangent((_ProfileData[1].Item2 - _ProfileData[0].Item2) / (_ProfileData[1].Item1 - _ProfileData[0].Item1)) + d2;
-            double d4 = d3 - _Math.ArcTangent((_ProfileData[5].Item2 - _ProfileData[4].Item2) / (_ProfileData[5].Item1 - _ProfileData[4].Item1));
+            double d1 = 0;
+            double d2 = 0;
+            double d3 = 0;
+            double d4 = 0;
+
+            if (!_StartOnly && !_EndOnly)
+            {
+                d2 = _Math.ArcTangent((_ProfileDataContainer[1].Item2 - _ProfileDataContainer[2].Item2) / (_ProfileDataContainer[2].Item1 - _ProfileDataContainer[1].Item1));
+                d3 = _Math.ArcTangent((_ProfileDataContainer[4].Item2 - _ProfileDataContainer[3].Item2) / (_ProfileDataContainer[4].Item1 - _ProfileDataContainer[3].Item1));
+                d1 = _Math.ArcTangent((_ProfileDataContainer[1].Item2 - _ProfileDataContainer[0].Item2) / (_ProfileDataContainer[1].Item1 - _ProfileDataContainer[0].Item1)) + d2;
+                d4 = d3 - _Math.ArcTangent((_ProfileDataContainer[5].Item2 - _ProfileDataContainer[4].Item2) / (_ProfileDataContainer[5].Item1 - _ProfileDataContainer[4].Item1));
+            }
+
+            else if (_StartOnly)
+            {
+                d3 = _Math.ArcTangent((_ProfileDataContainer[4].Item2 - _ProfileDataContainer[3].Item2) / (_ProfileDataContainer[4].Item1 - _ProfileDataContainer[3].Item1));
+                d4 = d3 - _Math.ArcTangent((_ProfileDataContainer[5].Item2 - _ProfileDataContainer[4].Item2) / (_ProfileDataContainer[5].Item1 - _ProfileDataContainer[4].Item1));
+            }
+
+            else if (_EndOnly)
+            {
+                d2 = _Math.ArcTangent((_ProfileDataContainer[1].Item2 - _ProfileDataContainer[2].Item2) / (_ProfileDataContainer[2].Item1 - _ProfileDataContainer[1].Item1));
+                d1 = _Math.ArcTangent((_ProfileDataContainer[1].Item2 - _ProfileDataContainer[0].Item2) / (_ProfileDataContainer[1].Item1 - _ProfileDataContainer[0].Item1)) + d2;
+            }
 
             _ActualDeflections = new List<double> { d1, d2, d3, d4, };
         }

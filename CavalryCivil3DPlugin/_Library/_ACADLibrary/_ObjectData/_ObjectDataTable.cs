@@ -61,7 +61,6 @@ namespace CavalryCivil3DPlugin.ACADLibrary._ObjectData
             }
 
             return allFields;
-
         }
 
 
@@ -84,7 +83,6 @@ namespace CavalryCivil3DPlugin.ACADLibrary._ObjectData
 
                     List<MapValue> values = new List<MapValue>();
                     List<string> valueString = new List<string>();
-                    List<FieldDefinition> fields = new List<FieldDefinition>();
 
                     foreach (Record record in records)
                     {
@@ -105,6 +103,60 @@ namespace CavalryCivil3DPlugin.ACADLibrary._ObjectData
             }
 
             return allTables;
+        }
+
+
+        public static List<string> GetAllTableNamesFromObject(Document _autocadDocument, ObjectId _objectId)
+        {
+            using (Transaction tr = _autocadDocument.Database.TransactionManager.StartTransaction())
+            {
+
+                Records plineRecords = objectDataTables.GetObjectRecords(0, _objectId, GISOpenmode.OpenForRead, true);
+                List<Record> records = plineRecords.Cast<Record>().ToList();
+
+                List<string> tableNames = records.Select(x => x.TableName).ToList();
+
+                return tableNames;
+            }
+        }
+
+
+
+        public static Dictionary<string, string> GetPropFromObject(Document _autocadDocument, ObjectId _objectId, string _tableName)
+        {
+            Dictionary<string, string> fieldValue = new Dictionary<string, string>();
+            using (Transaction tr = _autocadDocument.Database.TransactionManager.StartTransaction())
+            {
+                Records objectRecords = objectDataTables.GetObjectRecords(0, _objectId, GISOpenmode.OpenForRead, true);
+                
+                if (objectRecords.Count > 0)
+                {
+                    List<Record> records = objectRecords.Cast<Record>().ToList();
+
+                    List<string> tableNames = records.Select(x => x.TableName).ToList();
+
+                    if (tableNames.Contains(_tableName))
+                    {
+                        GISTable table = objectDataTables[_tableName];
+                        List<MapValue> values = new List<MapValue>();
+
+                        foreach (Record record in records)
+                        {
+                            if (record.TableName == _tableName)
+                            {
+                                int totalFields = record.Count;
+
+                                for (int index = 0; index < totalFields; index++)
+                                {
+                                    fieldValue[table.FieldDefinitions[index].Name] = record[index].StrValue;
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                return fieldValue;
+            }
         }
     }
 }

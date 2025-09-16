@@ -92,8 +92,8 @@ namespace CavalryCivil3DPlugin.Models.CADObject
         }
 
 
-        private List<FilterModel> _Filters = new List<FilterModel>();
-        public List<FilterModel> Filters
+        private List<FilterModel_> _Filters = new List<FilterModel_>();
+        public List<FilterModel_> Filters
         {
             get { return _Filters;}
         }
@@ -300,7 +300,7 @@ namespace CavalryCivil3DPlugin.Models.CADObject
             switch (ObjectName_)
             {
                 case "Polyline":
-                    _Filters.Add(new FilterModel(new LayersModel(AutocadDocument)));
+                    _Filters.Add(new FilterModel_(new LayersModel(AutocadDocument)));
 
                     Dictionary<string, List<string>> fields = _ObjectDataTable.GetAllFields(AutocadDocument);
                     foreach (var field in fields.Keys)
@@ -310,14 +310,14 @@ namespace CavalryCivil3DPlugin.Models.CADObject
 
                     foreach (var objectDataModel in _ObjectDataModel)
                     {
-                        FilterModel filter = new FilterModel(objectDataModel);
+                        FilterModel_ filter = new FilterModel_(objectDataModel);
                         _Filters.Add(filter);
                     }
                     break;
 
                 case "Feature Lines":
-                    _Filters.Add(new FilterModel(new SitesModel(AutocadDocument, Civil3DDocument)));
-                    _Filters.Add(new FilterModel(new LayersModel(AutocadDocument)));
+                    _Filters.Add(new FilterModel_(new SitesModel(AutocadDocument, Civil3DDocument)));
+                    _Filters.Add(new FilterModel_(new LayersModel(AutocadDocument)));
                     break;  
             }
         }

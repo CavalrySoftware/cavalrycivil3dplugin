@@ -60,5 +60,19 @@ namespace CavalryCivil3DPlugin.ACADLibrary.Elements
 
             }
         }
+
+        public static Point3d GetMidPoint(Document _autocadDocument, ObjectId _polylineId)
+            
+        {
+            using (Transaction tr = _autocadDocument.Database.TransactionManager.StartTransaction())
+            {
+                Polyline polyline = tr.GetObject(_polylineId, OpenMode.ForRead) as Polyline;    
+                double halfLength = polyline.Length / 2.0;
+
+                double param = polyline.GetParameterAtDistance(halfLength);
+
+                return polyline.GetPointAtParameter(param);
+            }
+        }
     }
 }

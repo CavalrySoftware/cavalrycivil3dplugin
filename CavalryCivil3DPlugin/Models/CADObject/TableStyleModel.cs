@@ -9,9 +9,8 @@ using CavalryCivil3DPlugin.ACADLibrary.AutoCADTable;
 
 namespace CavalryCivil3DPlugin.Models.CADObject
 {
-    public class TableSyleModel
+    public class TableStyleModel
     {
-
 
         private List<string> _ExistingStyleNames;
 
@@ -24,16 +23,19 @@ namespace CavalryCivil3DPlugin.Models.CADObject
 
 
         private int _DefaultItem;
-
         public int DefaultItem
         {
             get { return _DefaultItem; }
         }
 
+        private string _DefaultStyle;
+        public string DefaultStyle => _DefaultStyle;
+
+
 
         private string _DefaultStyleName = "Coordinates Easting Northing";
 
-        public TableSyleModel(Document _autocadDocument)
+        public TableStyleModel(Document _autocadDocument)
         {
             _AutocadDocument = _autocadDocument;
             _ExistingStyleNames = CADTable.GetAllTableStyleNames(_AutocadDocument);
@@ -43,12 +45,7 @@ namespace CavalryCivil3DPlugin.Models.CADObject
         private void SetDefault()
         {
             _DefaultItem = _ExistingStyleNames.Contains(_DefaultStyleName) ? _ExistingStyleNames.IndexOf(_DefaultStyleName) : 0;
+            _DefaultStyle = _ExistingStyleNames[_DefaultItem];
         }
-
-
-
-
-
-
     }
 }

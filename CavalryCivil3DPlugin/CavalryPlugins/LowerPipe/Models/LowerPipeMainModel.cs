@@ -216,9 +216,22 @@ namespace CavalryCivil3DPlugin.CavalryPlugins.LowerPipe.Models
             
                 if (_ValidSelection)
                 {
-                    LoweringAnalysisModel.Analyze();
-                    _Loaded = true;
-                    Calculate();
+                    if (_ViewModel.SelectedObjectReference.ReferenceName == "End of Pipe Run")
+                    {
+                        LoweringAnalysisModel.Analyze();
+                        if (LoweringAnalysisModel.AnalysisValid)
+                        {
+                            _Loaded = true;
+                            Calculate();
+                        }
+                    }
+
+                    else
+                    {
+                        LoweringAnalysisModel.Analyze();
+                        _Loaded = true;
+                        Calculate();
+                    }
                 }
             }
 
@@ -240,7 +253,10 @@ namespace CavalryCivil3DPlugin.CavalryPlugins.LowerPipe.Models
                     GenerateProfileData();
                     if (_PipeLowering.ValidCalculation)
                     {
-                        _CanvasModel.Update();
+                        bool startOnly = _ViewModel.SelectedObjectReference.EndofPipe && _LoweringAnalysisModel.LoweringEnd == "start";
+                        bool endOnly = _ViewModel.SelectedObjectReference.EndofPipe && _LoweringAnalysisModel.LoweringEnd == "end";
+
+                        _CanvasModel.Update(_startOnly: startOnly, _endOnly: endOnly);
                     }
                     else
                     {
@@ -274,7 +290,10 @@ namespace CavalryCivil3DPlugin.CavalryPlugins.LowerPipe.Models
 
         private void GenerateProfileData()
         {
-             _PipeLowering.Generate
+            bool startOnly = _ViewModel.SelectedObjectReference.EndofPipe && _LoweringAnalysisModel.LoweringEnd == "start";
+            bool endOnly = _ViewModel.SelectedObjectReference.EndofPipe && _LoweringAnalysisModel.LoweringEnd == "end";
+
+            _PipeLowering.Generate
                 (
                 _referenceCover: _ReferenceCover,
                 _referenceDepth: _ReferenceClearDepth,
@@ -285,7 +304,10 @@ namespace CavalryCivil3DPlugin.CavalryPlugins.LowerPipe.Models
                 _groundElevation: _LoweringAnalysisModel.CalculatedGroundElevation,
                 _stationOrigin: _LoweringAnalysisModel.StationOrigin,
                 _referenceAlignmentId: _LowerPipe.RunAlignmentId,
-                _referenceProfileId: _LowerPipe.RunProfileId
+                _referenceProfileId: _LowerPipe.RunProfileId,
+                _groundProfileId: _LowerPipe.GroundProfileId,
+                _startOnly: startOnly,
+                _endOnly: endOnly
                 );
         }
 

@@ -52,8 +52,8 @@ namespace CavalryCivil3DPlugin.CavalryPlugins.ExtractCoordinates.ViewModel
         private CADObjectTypesMainModel CADObjectsMainModel_;
         public CADObjectTypesMainModel CADObjectsMainModel { get { return CADObjectsMainModel_; } set { OnPropertyChanged(nameof(CADObjectsMainModel));}}
 
-        private TableSyleModel _TableStyles;
-        public TableSyleModel TableStyles
+        private TableStyleModel _TableStyles;
+        public TableStyleModel TableStyles
         {
             get { return _TableStyles; }
             set { OnPropertyChanged(nameof(TableStyles));}
@@ -214,8 +214,8 @@ namespace CavalryCivil3DPlugin.CavalryPlugins.ExtractCoordinates.ViewModel
         }
 
 
-        private FilterModel _SelectedFilter;
-        public FilterModel SelectedFilter
+        private FilterModel_ _SelectedFilter;
+        public FilterModel_ SelectedFilter
         {
             get { return _SelectedFilter; }
             set
@@ -230,7 +230,6 @@ namespace CavalryCivil3DPlugin.CavalryPlugins.ExtractCoordinates.ViewModel
 
 
         private string _SelectedTableStyle;
-
         public string SelectedTableStyle
         {
             get { return _SelectedTableStyle; }
@@ -440,7 +439,7 @@ namespace CavalryCivil3DPlugin.CavalryPlugins.ExtractCoordinates.ViewModel
             CADObjectsMainModel_ = new CADObjectTypesMainModel(AutocadDocument, cadObjects, Civil3DDocument);
             SelectedObjectType = CADObjectsMainModel_.CADObjectTypes.FirstOrDefault();
             SelectedFilter = SelectedObjectType.Filters.FirstOrDefault();
-            _TableStyles = new TableSyleModel(AutocadDocument);
+            _TableStyles = new TableStyleModel(AutocadDocument);
             SelectedTableStyle = _TableStyles.ExistingStyleNames[_TableStyles.DefaultItem];
 
             TableName = "SETTING OUT POINTS";

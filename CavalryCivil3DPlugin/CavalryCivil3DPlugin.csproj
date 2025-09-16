@@ -115,6 +115,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.IO.Pipelines, Version=9.0.0.7, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\System.IO.Pipelines.9.0.7\lib\net462\System.IO.Pipelines.dll</HintPath>
       <Private>False</Private>
@@ -148,6 +149,7 @@
       <HintPath>..\packages\System.ValueTuple.4.5.0\lib\net47\System.ValueTuple.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -165,6 +167,19 @@
     <Compile Include="CavalryAddin\PressurePipes\LowerPipeCommandHandler.cs" />
     <Compile Include="CavalryAddin\PressurePipes\_PressurePipePanel.cs" />
     <Compile Include="CavalryPlugins\ExtractCoordinates\Views\ExtractCoordinateWindowManager.cs" />
+    <Compile Include="CavalryPlugins\ExtractSOP\Commands\OkCommand.cs" />
+    <Compile Include="CavalryPlugins\ExtractSOP\Commands\PickPolylineSOPCommand.cs" />
+    <Compile Include="CavalryPlugins\ExtractSOP\ExtractSOPStartUp.cs" />
+    <Compile Include="CavalryPlugins\ExtractSOP\Models\CoordinateModel.cs" />
+    <Compile Include="CavalryPlugins\ExtractSOP\Models\PolylineReferenceModel.cs" />
+    <Compile Include="CavalryPlugins\ExtractSOP\Models\SOPCoordinateModel.cs" />
+    <Compile Include="CavalryPlugins\ExtractSOP\Models\SOPMainModel.cs" />
+    <Compile Include="CavalryPlugins\ExtractSOP\Models\SOPObjectModel.cs" />
+    <Compile Include="CavalryPlugins\ExtractSOP\Models\SurfaceModelCollection.cs" />
+    <Compile Include="CavalryPlugins\ExtractSOP\ViewModels\SOPMainViewModel.cs" />
+    <Compile Include="CavalryPlugins\ExtractSOP\Views\SOPMainView.xaml.cs">
+      <DependentUpon>SOPMainView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="CavalryPlugins\LowerPipe\Commands\ApplyProfileCommand.cs" />
     <Compile Include="CavalryPlugins\LowerPipe\Commands\CancelCommand.cs" />
     <Compile Include="CavalryPlugins\LowerPipe\Commands\OkCommand.cs" />
@@ -189,9 +204,45 @@
     <Compile Include="CavalryPlugins\MTO\View\MTOWindow.xaml.cs">
       <DependentUpon>MTOWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="CavalryPlugins\SelectObjects\Models\LayerCollection.cs" />
+    <Compile Include="CavalryPlugins\SelectObjects\Models\ObjectCollectionModel.cs" />
+    <Compile Include="CavalryPlugins\SelectObjects\Models\ObjectElementModel.cs" />
+    <Compile Include="CavalryPlugins\SelectObjects\Models\ObjectModel.cs" />
+    <Compile Include="CavalryPlugins\SelectObjects\Models\PropertyModel.cs" />
+    <Compile Include="CavalryPlugins\SelectObjects\Models\PropertyTypeCollection.cs" />
+    <Compile Include="CavalryPlugins\SelectObjects\Models\PropertyTypeModel.cs" />
+    <Compile Include="CavalryPlugins\SelectObjects\Models\SelectObjectsMainModel.cs" />
+    <Compile Include="CavalryPlugins\SelectObjects\SelectObjectsStartUps.cs" />
+    <Compile Include="CavalryPlugins\SelectObjects\ViewModels\SelectObjectsMainViewModel.cs" />
+    <Compile Include="CavalryPlugins\SelectObjects\Views\SelectObjectsView.xaml.cs">
+      <DependentUpon>SelectObjectsView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="CavalryPlugins\Tag\Commands\AddTagCommand.cs" />
+    <Compile Include="CavalryPlugins\Tag\Models\CavalryObjectKeyPlanTag.cs" />
+    <Compile Include="CavalryPlugins\Tag\Models\CavalryObjectKeyPlanTagCollection.cs" />
+    <Compile Include="CavalryPlugins\Tag\Models\FilterModel.cs" />
+    <Compile Include="CavalryPlugins\Tag\Models\FilterModelCollection.cs" />
+    <Compile Include="CavalryPlugins\Tag\Models\ObjectTag.cs" />
+    <Compile Include="CavalryPlugins\Tag\Models\ObjectTagCollection.cs" />
+    <Compile Include="CavalryPlugins\Tag\Models\TagAlignmentModel.cs" />
+    <Compile Include="CavalryPlugins\Tag\Models\TagMainModel.cs" />
+    <Compile Include="CavalryPlugins\Tag\TagStartUp.cs" />
+    <Compile Include="CavalryPlugins\Tag\ViewModels\TagMainViewModel.cs" />
+    <Compile Include="CavalryPlugins\Tag\Views\TagMainView.xaml.cs">
+      <DependentUpon>TagMainView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="CavalryPlugins\_CustomCommands\ACCTest.cs" />
+    <Compile Include="CavalryPlugins\_CustomCommands\GetAllUndergroundPowerLine.cs" />
+    <Compile Include="CavalryPlugins\_CustomCommands\GetAllWater.cs" />
+    <Compile Include="CavalryPlugins\_CustomCommands\GetAllGas.cs" />
     <Compile Include="CavalryPlugins\_CustomCommands\InsertBlockToVertex.cs" />
+    <Compile Include="CavalryPlugins\_CustomCommands\ChangeProfileViewBandSet_.cs" />
+    <Compile Include="CavalryPlugins\_CustomCommands\MergeAnnotation.cs" />
     <Compile Include="MainApp.cs" />
+    <Compile Include="Models\CADObject\AlignmentModel.cs" />
+    <Compile Include="Models\CADObject\AlignmentModelCollection.cs" />
+    <Compile Include="Models\CADObject\AlignmentStationOffsetLabelStyleCollection.cs" />
+    <Compile Include="Models\CADObject\LabelStyleModel.cs" />
     <Compile Include="Models\CADObject\PressurePipeModel.cs" />
     <Compile Include="CavalryPlugins\LowerPipe\ViewModels\LowerPipeMainViewModel.cs" />
     <Compile Include="CavalryPlugins\LowerPipe\ViewModels\ShapeViewModel.cs" />
@@ -199,10 +250,12 @@
     <Compile Include="CavalryPlugins\LowerPipe\Views\LowerPipeMainWindow.xaml.cs">
       <DependentUpon>LowerPipeMainWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Models\CADObject\SurfaceModel.cs" />
     <Compile Include="Models\UI\LoggerViewModel.cs" />
     <Compile Include="WPFSupportFunctions\Supports\ClippingBorder.cs" />
     <Compile Include="WPFSupportFunctions\Supports\EnumToBooleanConverter.cs" />
     <Compile Include="_Library\_ACADLibrary\Annotation\CADText.cs" />
+    <Compile Include="_Library\_ACADLibrary\Annotation\_MLeader.cs" />
     <Compile Include="_Library\_ACADLibrary\Elements\_Line.cs" />
     <Compile Include="_Library\_ACADLibrary\Elements\_Polyline.cs" />
     <Compile Include="_Library\_ACADLibrary\Geometry\Lines.cs" />
@@ -212,6 +265,7 @@
     <Compile Include="_Library\_ACC\ACCManage.cs" />
     <Compile Include="_Library\_C3DLibrary\Custom\PipeLowering.cs" />
     <Compile Include="_Library\_C3DLibrary\Elements\_Alignment.cs" />
+    <Compile Include="_Library\_C3DLibrary\Elements\_COGOPoint.cs" />
     <Compile Include="_Library\_C3DLibrary\Elements\_FeatureLines.cs" />
     <Compile Include="_Library\_C3DLibrary\Elements\_Points.cs" />
     <Compile Include="_Library\_C3DLibrary\Elements\_PressurePipe.cs" />
@@ -235,16 +289,17 @@
     <Compile Include="Models\CADObject\CADObjectModel.cs" />
     <Compile Include="Models\CADObject\CADObjectTypesMainModel.cs" />
     <Compile Include="Models\CADObject\FeatureLinesModel.cs" />
-    <Compile Include="Models\CADObject\FilterModel.cs" />
+    <Compile Include="Models\CADObject\FilterModel_.cs" />
     <Compile Include="Models\CADObject\LayersModel.cs" />
     <Compile Include="Models\CADObject\ObjectDataModel.cs" />
     <Compile Include="Models\CADObject\PolylineModel.cs" />
     <Compile Include="Models\CADObject\SitesModel.cs" />
-    <Compile Include="Models\CADObject\TableSyleModel.cs" />
+    <Compile Include="Models\CADObject\TableStyleModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WPFSupportFunctions\Supports\EmptyToZeroConverter.cs" />
     <Compile Include="WPFSupportFunctions\Supports\FocusHelper.cs" />
     <Compile Include="_Library\_C3DLibrary\_PropertySet\C3DPropertySet.cs" />
+    <Compile Include="_Library\_CustomModule\_ObservableCollection.cs" />
     <Compile Include="_Library\_ExcelLibrary\_CSV.cs" />
     <Compile Include="_Library\_ExcelLibrary\_Excel.cs" />
     <Compile Include="_Library\_MathLibrary\_Math.cs" />
@@ -258,11 +313,23 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="CavalryPlugins\ExtractSOP\Views\SOPMainView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="CavalryPlugins\LowerPipe\Views\LowerPipeMainWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="CavalryPlugins\MTO\View\MTOWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="CavalryPlugins\SelectObjects\Views\SelectObjectsView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="CavalryPlugins\Tag\Views\TagMainView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

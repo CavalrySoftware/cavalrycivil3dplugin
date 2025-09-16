@@ -24,6 +24,14 @@ namespace CavalryCivil3DPlugin.CavalryPlugins.LowerPipe.Models
         private Document _AutocadDocument;
         #endregion
 
+        #region BOOLEAN PROPERTIES
+        private bool _AnalysisValid = true;
+        public bool AnalysisValid => _AnalysisValid;
+
+        private string _LoweringEnd;
+        public string LoweringEnd => _LoweringEnd;
+        #endregion
+
 
         #region << CALCULATED PROPERTIES >>
         private Point2d _IntersectionPoint;
@@ -42,7 +50,7 @@ namespace CavalryCivil3DPlugin.CavalryPlugins.LowerPipe.Models
         public double CalculatedGroundElevation => _CalculatedGroundElevation;
 
         private double _StationOrigin;
-        public double StationOrigin => _StationOrigin;   
+        public double StationOrigin => _StationOrigin;
         #endregion
 
 
@@ -71,6 +79,10 @@ namespace CavalryCivil3DPlugin.CavalryPlugins.LowerPipe.Models
                 case "Polyline":
                     AnalyzeByPolylineReference();
                     break;
+
+                case "End of Pipe Run":
+                    AnalyzeByEndofPipeReference();
+                    break;
             }
         }
 
@@ -88,6 +100,61 @@ namespace CavalryCivil3DPlugin.CavalryPlugins.LowerPipe.Models
             _ViewModel.ReferenceClearCover = $"{_CalculatedCover: 0.00}";
             _ViewModel.ReferenceClearDepth = $"{_CalculatedDepth: 0.00}";
             _ViewModel.IsNotPipeReference = false;
+        }
+
+
+        private void AnalyzeByEndofPipeReference()
+        {
+            PressurePipeModel referencePipe = _ViewModel.SelectedObjectReference.PressurePipeReference;
+            PressurePipeModel lowerPipe = _MainModel.LowerPipe;
+
+
+            using (Transaction tr = _AutocadDocument.Database.TransactionManager.StartTransaction())
+            {
+                PressurePipe referencePressurePipe = tr.GetObject(referencePipe.ObjectId_, OpenMode.ForRead) as PressurePipe;
+                PressurePipe lowerPressurePipe = tr.GetObject(lowerPipe.ObjectId_, OpenMode.ForRead) as PressurePipe;
+
+                Point3d referencePoint = referencePressurePipe.EndPoint;
+
+                Point3d mainPipeStartPoint = lowerPressurePipe.StartPoint;
+                Point3d mainPipeEndPoint = lowerPressurePipe.EndPoint;
+
+                double distanceStart = mainPipeStartPoint.DistanceTo(referencePoint);
+                double distanceEnd = mainPipeEndPoint.DistanceTo(referencePoint);
+
+
+                if ((distanceStart < distanceEnd) && lowerPressurePipe.StartConnection.Open)
+                {
+                    _LoweringEnd = "start";
+                    _IntersectionPoint = new Point2d(lowerPressurePipe.StartPoint.X, lowerPressurePipe.StartPoint.Y);
+                    _ViewModel.LowerPipeMainModel_.LoggerModel_.SetLogMessage("Pipe Alignment is to be lowered at Start Station to be vertically aligned with the reference pipe.");
+                    _AnalysisValid = true;  
+                }
+
+                else if ((distanceEnd  < distanceStart) && lowerPressurePipe.EndConnection.Open)
+                {
+                    _LoweringEnd = "end";
+                    _IntersectionPoint = new Point2d(lowerPressurePipe.EndPoint.X, lowerPressurePipe.EndPoint.Y);
+                    _ViewModel.LowerPipeMainModel_.LoggerModel_.SetLogMessage("Pipe Alignment is to be lowered at End Station to be vertically aligned with the reference pipe.");
+                    _AnalysisValid = true;
+                }
+
+                else
+                {
+                    _AnalysisValid = false;
+                    _ViewModel.LowerPipeMainModel_.LoggerModel_.SetErrorMessage("Invalid objects. The connection of the end of pipe to be lowered must be open at the point of the reference Pipe.");
+                    return;
+                }
+
+                AnalyzeIntersectionProperties(_IntersectionPoint, _isPipeReference: true);
+
+                // Send Back to ViewModel
+                _ViewModel.ReferenceClearCover = $"{_CalculatedCover:0.00}";
+                _ViewModel.ReferenceClearDepth = $"{referencePressurePipe.OuterDiameter:0.00}";
+                _ViewModel.VerticalClearance = $"{0:0.00}";
+                _ViewModel.IsNotPipeReference = false;
+
+            } 
         }
 
 
@@ -167,6 +234,5 @@ namespace CavalryCivil3DPlugin.CavalryPlugins.LowerPipe.Models
                 }
             }
         }
-
     }
 }
